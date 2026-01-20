@@ -3,22 +3,22 @@
 #include "CComponent.h"
 #include "CEngineTexture.h"
 #include "CActor.h"
-//#include <SDL3/SDL.h>
+#include "ChimasUtilities.h"
 #include <string>
 
 class CSpriteComponent : public CComponent
 {
 private:
     CEngineTexture* texture;
-    SDL_FRect renderRect;
-    SDL_FRect sourceRect;  // For sprite sheets
+    RectF renderRect;
+    RectF sourceRect;  // For sprite sheets
     bool ownsTexture;
     bool useSourceRect;
 
     // Rendering properties
     float alpha;
     Color tintColor;
-    SDL_FlipMode flipMode;
+    FlipMode flipMode;
 
 public:
     CSpriteComponent(CActor* owner);
@@ -44,12 +44,12 @@ public:
     // Visual properties
     void SetAlpha(float a) { alpha = a; }
     void SetTint(const Color& color) { tintColor = color; }
-    void SetFlip(SDL_FlipMode flip) { flipMode = flip; }
+    void SetFlip(FlipMode flip) { flipMode = flip; }
 
     // Getters
     CEngineTexture* GetTexture() const { return texture; }
-    SDL_FRect GetRenderRect() const { return renderRect; }
-    SDL_FRect GetSourceRect() const { return sourceRect; }
+    RectF GetRenderRect() const { return renderRect; }
+    RectF GetSourceRect() const { return sourceRect; }
     float GetAlpha() const { return alpha; }
 };
 

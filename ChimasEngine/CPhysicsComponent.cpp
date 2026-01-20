@@ -2,30 +2,43 @@
 #include "CPhysicsComponent.h"
 #include "CActor.h"
 #include "CWorld.h"
-#include <SDL3/SDL.h>
+#include "ChimasLog.h"
+#include <box2d.h>
+
+struct CPhysicsComponent::Impl
+{
+    b2BodyId bodyId = b2_nullBodyId;
+    b2ShapeId shapeId = b2_nullShapeId;
+};
 
 CPhysicsComponent::CPhysicsComponent(CActor* owner, BodyType type)
     : CComponent(owner), bodyType(type),
     collisionCategory(0x0001), collisionMask(0xFFFF)
 {
-    bodyId = b2_nullBodyId;
-    shapeId = b2_nullShapeId;
+    impl = new Impl();
 }
 
-CPhysicsComponent::~CPhysicsComponent() {}
+CPhysicsComponent::~CPhysicsComponent()
+{
+    Destroy();
+    delete impl;
+    impl = nullptr;
+}
 
 void CPhysicsComponent::BeginPlay()
 {
     CWorld* world = owner->GetWorld();
     if (!world) return;
 
-    b2WorldId worldId = world->GetPhysicsWorld();
+    PhysicsWorldHandle h = world->GetPhysicsWorldHandle();
+    b2WorldId worldId{ h.index1, h.generation };
     if (B2_IS_NULL(worldId)) return;
 
     // Create body
     b2BodyDef bodyDef = b2DefaultBodyDef();
     Vector2 pos = owner->GetPosition();
-    bodyDef.position = world->ToMeters(pos);
+    Vector2 posMeters = world->ToMeters(pos);
+    bodyDef.position = { posMeters.x, posMeters.y };
 
     // Set body type
     switch (bodyType)
@@ -35,28 +48,28 @@ void CPhysicsComponent::BeginPlay()
     case BodyType::Dynamic:   bodyDef.type = b2_dynamicBody; break;
     }
 
-    bodyId = b2CreateBody(worldId, &bodyDef);
+    impl->bodyId = b2CreateBody(worldId, &bodyDef);
 
     // CRITICAL: Store actor pointer for collision callbacks
-    b2Body_SetUserData(bodyId, owner);
+    b2Body_SetUserData(impl->bodyId, owner);
 
 
 
-    SDL_Log("✓ Physics body created for actor at (%.1f, %.1f)", pos.x, pos.y);
+    ChimasLog::Info("Physics body created for actor at (%.1f, %.1f)", pos.x, pos.y);
 }
 
 void CPhysicsComponent::Tick(float deltaTime)
 {
-    if (B2_IS_NULL(bodyId) || !isActive) return;
+    if (!impl || B2_IS_NULL(impl->bodyId) || !isActive) return;
 
     CWorld* world = owner->GetWorld();
     if (!world) return;
 
     // Sync actor position with physics
-    b2Vec2 b2Pos = b2Body_GetPosition(bodyId);
-    owner->SetPosition(world->ToPixels(b2Pos));
+    b2Vec2 b2Pos = b2Body_GetPosition(impl->bodyId);
+    owner->SetPosition(world->ToPixels(Vector2(b2Pos.x, b2Pos.y)));
 
-    b2Rot rotation = b2Body_GetRotation(bodyId);
+    b2Rot rotation = b2Body_GetRotation(impl->bodyId);
     owner->SetRotation(b2Rot_GetAngle(rotation) * 180.0f / 3.14159f);
 
 
@@ -64,32 +77,34 @@ void CPhysicsComponent::Tick(float deltaTime)
 
 void CPhysicsComponent::Destroy()
 {
-    if (!B2_IS_NULL(shapeId))
+    if (!impl) return;
+
+    if (!B2_IS_NULL(impl->shapeId))
     {
-        b2DestroyShape(shapeId, false);
-        shapeId = b2_nullShapeId;
+        b2DestroyShape(impl->shapeId, false);
+        impl->shapeId = b2_nullShapeId;
     }
 
-    if (!B2_IS_NULL(bodyId))
+    if (!B2_IS_NULL(impl->bodyId))
     {
-        b2DestroyBody(bodyId);
-        bodyId = b2_nullBodyId;
+        b2DestroyBody(impl->bodyId);
+        impl->bodyId = b2_nullBodyId;
     }
 }
 
 void CPhysicsComponent::SetFixedRotation(bool fixed)
 {
-    if (B2_IS_NULL(bodyId)) return;
+    if (!impl || B2_IS_NULL(impl->bodyId)) return;
 
     // Use motion locks to fix rotation
-    b2MotionLocks locks = b2Body_GetMotionLocks(bodyId);
+    b2MotionLocks locks = b2Body_GetMotionLocks(impl->bodyId);
     locks.angularZ = fixed;  // Lock angular rotation around Z-axis
-    b2Body_SetMotionLocks(bodyId, locks);
+    b2Body_SetMotionLocks(impl->bodyId, locks);
 }
 
 void CPhysicsComponent::CreateBoxShape(float width, float height, bool isSensor)
 {
-    if (B2_IS_NULL(bodyId)) return;
+    if (!impl || B2_IS_NULL(impl->bodyId)) return;
 
     CWorld* world = owner->GetWorld();
     if (!world) return;
@@ -111,15 +126,15 @@ void CPhysicsComponent::CreateBoxShape(float width, float height, bool isSensor)
     shapeDef.filter.categoryBits = collisionCategory;
     shapeDef.filter.maskBits = collisionMask;
 
-    shapeId = b2CreatePolygonShape(bodyId, &shapeDef, &box);
+    impl->shapeId = b2CreatePolygonShape(impl->bodyId, &shapeDef, &box);
 
-    SDL_Log("✓ Box shape created: %.1fx%.1f, Sensor=%d, Cat=0x%04X, Mask=0x%04X",
+    ChimasLog::Info("Box shape created: %.1fx%.1f, Sensor=%d, Cat=0x%04X, Mask=0x%04X",
         width, height, isSensor, collisionCategory, collisionMask);
 }
 
 void CPhysicsComponent::CreateCircleShape(float radius, bool isSensor)
 {
-    if (B2_IS_NULL(bodyId)) return;
+    if (!impl || B2_IS_NULL(impl->bodyId)) return;
 
     CWorld* world = owner->GetWorld();
     if (!world) return;
@@ -141,9 +156,9 @@ void CPhysicsComponent::CreateCircleShape(float radius, bool isSensor)
     shapeDef.filter.categoryBits = collisionCategory;
     shapeDef.filter.maskBits = collisionMask;
 
-    shapeId = b2CreateCircleShape(bodyId, &shapeDef, &circle);
+    impl->shapeId = b2CreateCircleShape(impl->bodyId, &shapeDef, &circle);
 
-    SDL_Log("✓ Circle shape created: radius=%.1f, Sensor=%d", radius, isSensor);
+    ChimasLog::Info("Circle shape created: radius=%.1f, Sensor=%d", radius, isSensor);
 }
 
 void CPhysicsComponent::SetCollisionFilter(uint32_t category, uint32_t mask)
@@ -152,32 +167,34 @@ void CPhysicsComponent::SetCollisionFilter(uint32_t category, uint32_t mask)
     collisionMask = mask;
 
     // Update existing shape if created
-    if (!B2_IS_NULL(shapeId))
+    if (impl && !B2_IS_NULL(impl->shapeId))
     {
         b2Filter filter;
         filter.categoryBits = category;
         filter.maskBits = mask;
         filter.groupIndex = 0;
-        b2Shape_SetFilter(shapeId, filter);
+        b2Shape_SetFilter(impl->shapeId, filter);
     }
 }
 
 void CPhysicsComponent::SetVelocity(const Vector2& velocity)
 {
-    if (B2_IS_NULL(bodyId)) return;
+    if (!impl || B2_IS_NULL(impl->bodyId)) return;
 
     CWorld* world = owner->GetWorld();
     if (!world) return;
 
-    b2Body_SetLinearVelocity(bodyId, world->ToMeters(velocity));
+    Vector2 m = world->ToMeters(velocity);
+    b2Body_SetLinearVelocity(impl->bodyId, b2Vec2{ m.x, m.y });
 }
 
 Vector2 CPhysicsComponent::GetVelocity() const
 {
-    if (B2_IS_NULL(bodyId)) return Vector2(0.0f, 0.0f);
+    if (!impl || B2_IS_NULL(impl->bodyId)) return Vector2(0.0f, 0.0f);
 
     CWorld* world = owner->GetWorld();
     if (!world) return Vector2(0.0f, 0.0f);
 
-    return world->ToPixels(b2Body_GetLinearVelocity(bodyId));
+    b2Vec2 v = b2Body_GetLinearVelocity(impl->bodyId);
+    return world->ToPixels(Vector2(v.x, v.y));
 }

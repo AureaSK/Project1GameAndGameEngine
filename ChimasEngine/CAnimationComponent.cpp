@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "CAnimationComponent.h"
 #include "CActor.h"
+#include "ChimasLog.h"
 
 // Change constructor to match header
 CAnimationComponent::CAnimationComponent(CActor* owner)
@@ -21,11 +22,11 @@ void CAnimationComponent::BeginPlay()
 
     if (!sprite)
     {
-        SDL_Log("CAnimationComponent: Warning - No sprite component found!");
+        ChimasLog::Info("CAnimationComponent: Warning - No sprite component found!");
     }
     else if (tileWidth == 0 || tileHeight == 0)
     {
-        SDL_Log("CAnimationComponent: Warning - Tile size not set!");
+        ChimasLog::Info("CAnimationComponent: Warning - Tile size not set!");
     }
 }
 
@@ -80,7 +81,7 @@ void CAnimationComponent::AddAnimation(const std::string& name, const std::vecto
     anim.loop = loop;
     animations.push_back(anim);
 
-    SDL_Log("Added animation '%s' with %zu frames", name.c_str(), frames.size());
+    ChimasLog::Info("Added animation '%s' with %zu frames", name.c_str(), frames.size());
 }
 
 void CAnimationComponent::PlayAnimation(const std::string& name)
@@ -110,7 +111,7 @@ void CAnimationComponent::PlayAnimation(const std::string& name)
         }
     }
 
-    SDL_Log("CAnimationComponent: Animation '%s' not found!", name.c_str());
+    ChimasLog::Info("CAnimationComponent: Animation '%s' not found!", name.c_str());
 }
 
 void CAnimationComponent::StopAnimation()

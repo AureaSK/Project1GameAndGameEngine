@@ -2,6 +2,7 @@
 #include "PlayerController.h"
 #include "SpaceshipPawn.h"
 #include "CInputManager.h"
+#include "ChimasInput.h"
 
 PlayerController::PlayerController(CWorld* world) : CController(world){}
 
@@ -35,27 +36,27 @@ void PlayerController::Tick(float deltaTime)
     Vector2 moveDirection(0.0f, 0.0f);
 
     // Keyboard input
-    if (input->IsKeyDown(SDLK_LEFT) || input->IsKeyDown(SDLK_A))
+    if (input->IsKeyDown(Key::Left) || input->IsKeyDown(Key::A))
     {
         moveDirection.x = -1.0f;
     }
-    else if (input->IsKeyDown(SDLK_RIGHT) || input->IsKeyDown(SDLK_D))
+    else if (input->IsKeyDown(Key::Right) || input->IsKeyDown(Key::D))
     {
         moveDirection.x = 1.0f;
     }
 
-    if (input->IsKeyDown(SDLK_UP) || input->IsKeyDown(SDLK_W))
+    if (input->IsKeyDown(Key::Up) || input->IsKeyDown(Key::W))
     {
         moveDirection.y = -1.0f;
     }
-    else if (input->IsKeyDown(SDLK_DOWN) || input->IsKeyDown(SDLK_S))
+    else if (input->IsKeyDown(Key::Down) || input->IsKeyDown(Key::S))
     {
         moveDirection.y = 1.0f;
     }
 
     // Gamepad input (overrides keyboard)
-    float axisX = input->GetAxis(SDL_GAMEPAD_AXIS_LEFTX);
-    float axisY = input->GetAxis(SDL_GAMEPAD_AXIS_LEFTY);
+    float axisX = input->GetAxis(GamepadAxis::LeftX);
+    float axisY = input->GetAxis(GamepadAxis::LeftY);
 
     if (std::abs(axisX) > 0.2f)
     {
@@ -71,7 +72,7 @@ void PlayerController::Tick(float deltaTime)
     spaceship->MoveInDirection(moveDirection);
 
     // Handle fire input
-    if (input->IsKeyPressed(SDLK_SPACE) || input->IsButtonPressed(SDL_GAMEPAD_BUTTON_SOUTH))
+    if (input->IsKeyPressed(Key::Space) || input->IsButtonPressed(GamepadButton::South))
     {
         spaceship->FireWeapon();
     }

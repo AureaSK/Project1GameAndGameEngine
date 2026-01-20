@@ -150,6 +150,9 @@
     <ClInclude Include="CEngine.h" />
     <ClInclude Include="CEngineRender.h" />
     <ClInclude Include="CEngineTexture.h" />
+    <ClInclude Include="ChimasInput.h" />
+    <ClInclude Include="ChimasLog.h" />
+    <ClInclude Include="ChimasPhysicsHandles.h" />
     <ClInclude Include="ChimasUtilities.h" />
     <ClInclude Include="CEngineWindow.h" />
     <ClInclude Include="CComponent.h" />

@@ -6,6 +6,7 @@
 #include "CPhysicsComponent.h"
 #include "Missile.h"
 #include "CWorld.h"
+#include "ChimasLog.h"
 
 Loner::Loner(CWorld* world)
     : CActor(world), sprite(nullptr), animation(nullptr), physics(nullptr),
@@ -51,7 +52,7 @@ void Loner::BeginPlay()
         CollisionCategory::PLAYER | CollisionCategory::PLAYER_PROJECTILE | CollisionCategory::WALL
     );
 
-    SDL_Log("Loner spawned at (%.1f, %.1f)", transform.position.x, transform.position.y);
+    ChimasLog::Info("Loner spawned at (%.1f, %.1f)", transform.position.x, transform.position.y);
 }
 
 void Loner::Tick(float deltaTime)
@@ -101,7 +102,7 @@ void Loner::OnCollision(CActor* other)
     Missile* missile = dynamic_cast<Missile*>(other);
     if (missile)
     {
-        SDL_Log("Loner hit by missile!");
+        ChimasLog::Info("Loner hit by missile!");
         Destroy();
         missile->OnCollision(this);
     }

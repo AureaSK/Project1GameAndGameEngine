@@ -5,6 +5,7 @@
 #include "CPhysicsComponent.h"
 #include "Missile.h"
 #include "CWorld.h"
+#include "ChimasLog.h"
 
 Rusher::Rusher(CWorld* world) : CActor(world), sprite(nullptr), animation(nullptr), physics(nullptr), speed(100.0f), direction(1.f) {}
 
@@ -54,7 +55,7 @@ void Rusher::BeginPlay()
     // FIXED: Create as SOLID collision (sensor = false for physical collision)
     physics->CreateBoxShape(60.0f, 60.0f, false);
 
-    SDL_Log("Rusher spawned at (%.1f, %.1f)", transform.position.x, transform.position.y);
+    ChimasLog::Info("Rusher spawned at (%.1f, %.1f)", transform.position.x, transform.position.y);
 }
 
 void Rusher::Tick(float deltaTime)
@@ -84,7 +85,7 @@ void Rusher::OnCollision(CActor* other)
     Missile* missile = dynamic_cast<Missile*>(other);
     if (missile)
     {
-        SDL_Log("Loner hit by missile!");
+        ChimasLog::Info("Rusher hit by missile!");
         Destroy();
         missile->OnCollision(this);
     }

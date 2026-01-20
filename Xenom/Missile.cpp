@@ -7,6 +7,7 @@
 #include "Loner.h"
 #include "Rusher.h"
 #include "CWorld.h"
+#include "ChimasLog.h"
 
 Missile::Missile(CWorld* world)
     : CActor(world), sprite(nullptr), animation(nullptr),
@@ -49,7 +50,7 @@ void Missile::BeginPlay()
 
     physics->CreateCircleShape(6.0f, false);
 
-    SDL_Log("Missile spawned at (%.1f, %.1f)", transform.position.x, transform.position.y);
+    ChimasLog::Info("Missile spawned at (%.1f, %.1f)", transform.position.x, transform.position.y);
 }
 
 void Missile::Tick(float deltaTime)
@@ -75,7 +76,7 @@ void Missile::OnCollision(CActor* other)
 
     if (loner || rusher)
     {
-        SDL_Log("Missile hit enemy!");
+        ChimasLog::Info("Missile hit enemy!");
 
         // Destroy the enemy
         //other->OnCollision(this);

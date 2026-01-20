@@ -9,7 +9,8 @@
 #include "EnemyProjectile.h"
 #include "Loner.h"
 #include "Rusher.h"
-#include "box2d.h"
+#include "ChimasInput.h"
+#include "ChimasLog.h"
 
 Spaceship::Spaceship(CWorld* world)
     : CActor(world), sprite(nullptr), animation(nullptr), moveSpeed(300.0f), fireRate(0.2f), fireCooldown(0.0f) {
@@ -65,7 +66,7 @@ void Spaceship::BeginPlay()
    
     // FIXED: Create as SOLID collision (sensor = false)
     physics->CreateBoxShape(50.0f, 50.0f, false);
-    SDL_Log("Spaceship initialized at (%.1f, %.1f)", transform.position.x, transform.position.y);
+    ChimasLog::Info("Spaceship initialized at (%.1f, %.1f)", transform.position.x, transform.position.y);
 
 }
 
@@ -77,7 +78,7 @@ void Spaceship::Tick(float deltaTime)
     Vector2 velocity(0.0f, 0.0f);
 
     // Horizontal movement
-    if (input->IsKeyDown(SDLK_LEFT) || input->IsKeyDown(SDLK_A))
+    if (input->IsKeyDown(Key::Left) || input->IsKeyDown(Key::A))
     {
         velocity.x = -moveSpeed;
         if (!animation->IsAnimationPlaying("left"))
@@ -85,7 +86,7 @@ void Spaceship::Tick(float deltaTime)
             animation->PlayAnimation("left");
         }
     }
-    else if (input->IsKeyDown(SDLK_RIGHT) || input->IsKeyDown(SDLK_D))
+    else if (input->IsKeyDown(Key::Right) || input->IsKeyDown(Key::D))
     {
         velocity.x = moveSpeed;
         if (!animation->IsAnimationPlaying("right"))
@@ -102,18 +103,18 @@ void Spaceship::Tick(float deltaTime)
     }
 
     // Vertical movement
-    if (input->IsKeyDown(SDLK_UP) || input->IsKeyDown(SDLK_W))
+    if (input->IsKeyDown(Key::Up) || input->IsKeyDown(Key::W))
     {
         velocity.y = -moveSpeed;
     }
-    else if (input->IsKeyDown(SDLK_DOWN) || input->IsKeyDown(SDLK_S))
+    else if (input->IsKeyDown(Key::Down) || input->IsKeyDown(Key::S))
     {
         velocity.y = moveSpeed;
     }
 
     // Gamepad support
-    float axisX = input->GetAxis(SDL_GAMEPAD_AXIS_LEFTX);
-    float axisY = input->GetAxis(SDL_GAMEPAD_AXIS_LEFTY);
+    float axisX = input->GetAxis(GamepadAxis::LeftX);
+    float axisY = input->GetAxis(GamepadAxis::LeftY);
 
     if (std::abs(axisX) > 0.2f)
     {
@@ -146,8 +147,8 @@ void Spaceship::Tick(float deltaTime)
     }
 
     // Fire missiles
-    if ((input->IsKeyPressed(SDLK_SPACE) ||
-        input->IsButtonPressed(SDL_GAMEPAD_BUTTON_SOUTH)) &&
+    if ((input->IsKeyPressed(Key::Space) ||
+        input->IsButtonPressed(GamepadButton::South)) &&
         fireCooldown <= 0.0f)
     {
         FireMissile();
@@ -158,7 +159,7 @@ void Spaceship::Tick(float deltaTime)
 void Spaceship::Destroy()
 {
     isPendingKill = true;
-    SDL_Log("GAME OVER - Player destroyed!");
+    ChimasLog::Info("GAME OVER - Player destroyed!");
 
     // Call base class destroy
     //CActor::Destroy();
@@ -181,7 +182,7 @@ void Spaceship::OnCollision(CActor* other)
     Loner* loner = dynamic_cast<Loner*>(other);
     if (loner || eProject)
     {
-        SDL_Log("Player hit enemy - GAME OVER!");
+        ChimasLog::Info("Player hit enemy - GAME OVER!");
         
         other->OnCollision(this);
 
@@ -198,6 +199,6 @@ void Spaceship::FireMissile()
         Vector2 spawnPos = transform.position;
         spawnPos.y -= 40.0f; // Spawn above ship
         missile->SetPosition(spawnPos);
-        SDL_Log("Missile fired!");
+        ChimasLog::Info("Missile fired!");
     }
 }

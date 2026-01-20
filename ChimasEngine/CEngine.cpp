@@ -119,7 +119,7 @@ void CEngine::Initialize(const char* title, int width, int height, const char* a
 
     CEngineTexture* background = new CEngineTexture();
     if (background->LoadFromFile(resolvedPath)) {
-        if (background->CreateTexture(renderer->GetSDLRenderer())) {
+        if (background->CreateTexture(static_cast<void*>(renderer->GetSDLRenderer()))) {
             textures.push_back(background);
         }
         else {
@@ -167,7 +167,7 @@ void CEngine::ProcessInput()
 
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
-        input->ProcessEvent(event);
+        input->ProcessNativeEvent(&event);
 
         if (event.type == SDL_EVENT_QUIT) {
             bRunning = false;
@@ -196,9 +196,9 @@ void CEngine::Render()
     // Draw background
     if (!textures.empty() && textures[0]) {
         CEngineTexture* bg = textures[0];
-        if (bg->GetTexture()) {
+        if (bg->GetNativeTexture()) {
             SDL_FRect destRect = { 0.0f, 0.0f, Width, Height};
-            renderer->DrawTexture(bg->GetTexture(), nullptr, &destRect);
+            renderer->DrawTexture(static_cast<SDL_Texture*>(bg->GetNativeTexture()), nullptr, &destRect);
         }
     }
 

@@ -47,3 +47,16 @@
         Transform() : position(0.0f, 0.0f), rotation(0.0f), scale(1.0f, 1.0f) {}
     };
 
+    // Engine-owned rectangle type (avoid leaking SDL_FRect into game code)
+    struct RectF {
+        float x, y, w, h;
+        RectF() : x(0), y(0), w(0), h(0) {}
+        RectF(float x, float y, float w, float h) : x(x), y(y), w(w), h(h) {}
+    };
+
+    // Engine-owned flip mode (avoid leaking SDL_FlipMode into game code)
+    enum class FlipMode : uint8_t {
+        None = 0,
+        Horizontal = 1,
+        Vertical = 2
+    };

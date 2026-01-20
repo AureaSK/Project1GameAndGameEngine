@@ -5,6 +5,7 @@
 #include "CPhysicsComponent.h"
 #include "Spaceship.h"
 #include "CWorld.h"
+#include "ChimasLog.h"
 
 EnemyProjectile::EnemyProjectile(CWorld* world)
     : CActor(world), sprite(nullptr), animation(nullptr),
@@ -46,7 +47,7 @@ void EnemyProjectile::BeginPlay()
 
     physics->CreateCircleShape(6.0f, false);
 
-    SDL_Log("Enemy projectile spawned at (%.1f, %.1f)", transform.position.x, transform.position.y);
+    ChimasLog::Info("Enemy projectile spawned at (%.1f, %.1f)", transform.position.x, transform.position.y);
 }
 
 void EnemyProjectile::Tick(float deltaTime)
@@ -72,7 +73,7 @@ void EnemyProjectile::OnCollision(CActor* other)
 
     if (spaceship)
     {
-        SDL_Log("Enemy projectile hit player!");
+        ChimasLog::Info("Enemy projectile hit player!");
 
         // Destroy the player (game over)
         //spaceship->OnCollision(this);
