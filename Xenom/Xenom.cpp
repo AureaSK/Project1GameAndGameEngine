@@ -10,7 +10,7 @@
 #include "PlayerController.h"
 #include "Rusher.h"
 #include "Loner.h"
-#include <box2d.h>
+#include "ChimasLog.h"
 
 int main()
 {
@@ -40,7 +40,7 @@ int main()
             if (playerController)
             {
                 playerController->Possess(spaceshipPawn);
-                SDL_Log("PlayerController possessed SpaceshipPawn");
+                ChimasLog::Info("PlayerController possessed SpaceshipPawn");
             }
         }
 

@@ -63,6 +63,15 @@
     <ClInclude Include="CController.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ChimasInput.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ChimasLog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ChimasPhysicsHandles.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ChimasEngine.cpp">

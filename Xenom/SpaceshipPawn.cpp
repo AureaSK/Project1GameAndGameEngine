@@ -9,7 +9,7 @@
 #include "EnemyProjectile.h"
 #include "Loner.h"
 #include "Rusher.h"
-#include "box2d.h"
+#include "ChimasLog.h"
 
 SpaceshipPawn::SpaceshipPawn(CWorld* world)
     : CPawn(world), sprite(nullptr), animation(nullptr), moveSpeed(300.0f), fireRate(0.2f), fireCooldown(0.0f){}
@@ -121,7 +121,7 @@ void SpaceshipPawn::FireWeapon()
             Vector2 spawnPos = transform.position;
             spawnPos.y -= 40.0f; // Spawn above ship
             missile->SetPosition(spawnPos);
-            SDL_Log("Missile fired!");
+            ChimasLog::Info("Missile fired!");
             fireCooldown = fireRate;
         }
     }
@@ -130,7 +130,7 @@ void SpaceshipPawn::FireWeapon()
 void SpaceshipPawn::Destroy()
 {
     isPendingKill = true;
-    SDL_Log("GAME OVER - Player destroyed!");
+    ChimasLog::Info("GAME OVER - Player destroyed!");
 
     // Unpossess before destroying
     if (controller)
@@ -149,7 +149,7 @@ void SpaceshipPawn::OnCollision(CActor* other)
 
     if (loner || eProject)
     {
-        SDL_Log("Player hit enemy - GAME OVER!");
+        ChimasLog::Info("Player hit enemy - GAME OVER!");
         other->OnCollision(this);
         Destroy();
     }

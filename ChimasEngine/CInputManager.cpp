@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "CInputManager.h"
+#include <SDL3/SDL.h>
 
 CInputManager* CInputManager::instance = nullptr;
 
@@ -35,7 +36,8 @@ void CInputManager::Initialize()
         gamepad = SDL_OpenGamepad(joysticks[0]);
         if (gamepad)
         {
-            SDL_Log("Gamepad connected: %s", SDL_GetGamepadName(gamepad));
+            
+            //SDL_Log("Gamepad connected: %s", SDL_GetGamepadName(gamepad));
         }
     }
 
@@ -52,40 +54,82 @@ void CInputManager::Update()
     buttonReleased.clear();
 }
 
-void CInputManager::ProcessEvent(const SDL_Event& event)
+static Key MapSDLKey(SDL_Keycode key)
 {
+    switch (key)
+    {
+    case SDLK_LEFT: return Key::Left;
+    case SDLK_RIGHT: return Key::Right;
+    case SDLK_UP: return Key::Up;
+    case SDLK_DOWN: return Key::Down;
+    case SDLK_A: return Key::A;
+    case SDLK_D: return Key::D;
+    case SDLK_W: return Key::W;
+    case SDLK_S: return Key::S;
+    case SDLK_SPACE: return Key::Space;
+    case SDLK_ESCAPE: return Key::Escape;
+    default: return Key::Unknown;
+    }
+}
+
+static GamepadButton MapSDLButton(SDL_GamepadButton btn)
+{
+    switch (btn)
+    {
+    case SDL_GAMEPAD_BUTTON_SOUTH: return GamepadButton::South;
+    default: return GamepadButton::South; // minimal mapping for now
+    }
+}
+
+static SDL_GamepadAxis MapAxis(GamepadAxis axis)
+{
+    switch (axis)
+    {
+    case GamepadAxis::LeftX: return SDL_GAMEPAD_AXIS_LEFTX;
+    case GamepadAxis::LeftY: return SDL_GAMEPAD_AXIS_LEFTY;
+    default: return SDL_GAMEPAD_AXIS_LEFTX;
+    }
+}
+
+void CInputManager::ProcessNativeEvent(const void* nativeEvent)
+{
+    if (!nativeEvent) return;
+    const SDL_Event& event = *static_cast<const SDL_Event*>(nativeEvent);
+
     if (event.type == SDL_EVENT_KEY_DOWN)
     {
-        keyPressed[event.key.key] = true;
+        keyPressed[MapSDLKey(event.key.key)] = true;
     }
     else if (event.type == SDL_EVENT_KEY_UP)
     {
-        keyReleased[event.key.key] = true;
+        keyReleased[MapSDLKey(event.key.key)] = true;
     }
     else if (event.type == SDL_EVENT_GAMEPAD_BUTTON_DOWN)
     {
-        buttonPressed[static_cast<SDL_GamepadButton>(event.gbutton.button)] = true;
+        buttonPressed[MapSDLButton(static_cast<SDL_GamepadButton>(event.gbutton.button))] = true;
     }
     else if (event.type == SDL_EVENT_GAMEPAD_BUTTON_UP)
     {
-        buttonReleased[static_cast<SDL_GamepadButton>(event.gbutton.button)] = true;
+        buttonReleased[MapSDLButton(static_cast<SDL_GamepadButton>(event.gbutton.button))] = true;
     }
     else if (event.type == SDL_EVENT_GAMEPAD_ADDED)
     {
         if (!gamepad)
         {
-            gamepad = SDL_OpenGamepad(event.gdevice.which);
-            if (gamepad)
+            SDL_Gamepad* gp = SDL_OpenGamepad(event.gdevice.which);
+            gamepad = gp;
+            if (gp)
             {
-                SDL_Log("Gamepad connected: %s", SDL_GetGamepadName(gamepad));
+                SDL_Log("Gamepad connected: %s", SDL_GetGamepadName(gp));
             }
         }
     }
     else if (event.type == SDL_EVENT_GAMEPAD_REMOVED)
     {
-        if (gamepad && event.gdevice.which == SDL_GetGamepadID(gamepad))
+        SDL_Gamepad* gp = static_cast<SDL_Gamepad*>(gamepad);
+        if (gp && event.gdevice.which == SDL_GetGamepadID(gp))
         {
-            SDL_CloseGamepad(gamepad);
+            SDL_CloseGamepad(gp);
             gamepad = nullptr;
             SDL_Log("Gamepad disconnected");
         }
@@ -94,53 +138,83 @@ void CInputManager::ProcessEvent(const SDL_Event& event)
 
 void CInputManager::Cleanup()
 {
-    if (gamepad)
+    SDL_Gamepad* gp = static_cast<SDL_Gamepad*>(gamepad);
+    if (gp)
     {
-        SDL_CloseGamepad(gamepad);
+        SDL_CloseGamepad(gp);
         gamepad = nullptr;
     }
 }
 
-bool CInputManager::IsKeyDown(SDL_Keycode key) const
+bool CInputManager::IsKeyDown(Key key) const
 {
     if (!keyboardState) return false;
-    SDL_Scancode scancode = SDL_GetScancodeFromKey(key, nullptr);
+
+    // Convert our Key -> SDL_Keycode -> scancode
+    SDL_Keycode sdlKey = SDLK_UNKNOWN;
+    switch (key)
+    {
+    case Key::Left: sdlKey = SDLK_LEFT; break;
+    case Key::Right: sdlKey = SDLK_RIGHT; break;
+    case Key::Up: sdlKey = SDLK_UP; break;
+    case Key::Down: sdlKey = SDLK_DOWN; break;
+    case Key::A: sdlKey = SDLK_A; break;
+    case Key::D: sdlKey = SDLK_D; break;
+    case Key::W: sdlKey = SDLK_W; break;
+    case Key::S: sdlKey = SDLK_S; break;
+    case Key::Space: sdlKey = SDLK_SPACE; break;
+    case Key::Escape: sdlKey = SDLK_ESCAPE; break;
+    default: sdlKey = SDLK_UNKNOWN; break;
+    }
+
+    SDL_Scancode scancode = SDL_GetScancodeFromKey(sdlKey, nullptr);
     return keyboardState[scancode];
 }
 
-bool CInputManager::IsKeyPressed(SDL_Keycode key) const
+bool CInputManager::IsKeyPressed(Key key) const
 {
     auto it = keyPressed.find(key);
     return it != keyPressed.end() && it->second;
 }
 
-bool CInputManager::IsKeyReleased(SDL_Keycode key) const
+bool CInputManager::IsKeyReleased(Key key) const
 {
     auto it = keyReleased.find(key);
     return it != keyReleased.end() && it->second;
 }
 
-bool CInputManager::IsButtonDown(SDL_GamepadButton button) const
+bool CInputManager::IsButtonDown(GamepadButton button) const
 {
-    if (!gamepad) return false;
-    return SDL_GetGamepadButton(gamepad, button);
+    SDL_Gamepad* gp = static_cast<SDL_Gamepad*>(gamepad);
+    if (!gp) return false;
+
+    SDL_GamepadButton sdlBtn = SDL_GAMEPAD_BUTTON_SOUTH;
+    switch (button)
+    {
+    case GamepadButton::South: sdlBtn = SDL_GAMEPAD_BUTTON_SOUTH; break;
+    default: sdlBtn = SDL_GAMEPAD_BUTTON_SOUTH; break;
+    }
+
+    return SDL_GetGamepadButton(gp, sdlBtn);
 }
 
-bool CInputManager::IsButtonPressed(SDL_GamepadButton button) const
+bool CInputManager::IsButtonPressed(GamepadButton button) const
 {
     auto it = buttonPressed.find(button);
     return it != buttonPressed.end() && it->second;
 }
 
-bool CInputManager::IsButtonReleased(SDL_GamepadButton button) const
+bool CInputManager::IsButtonReleased(GamepadButton button) const
 {
     auto it = buttonReleased.find(button);
     return it != buttonReleased.end() && it->second;
 }
 
-float CInputManager::GetAxis(SDL_GamepadAxis axis) const
+float CInputManager::GetAxis(GamepadAxis axis) const
 {
-    if (!gamepad) return 0.0f;
-    Sint16 value = SDL_GetGamepadAxis(gamepad, axis);
+    SDL_Gamepad* gp = static_cast<SDL_Gamepad*>(gamepad);
+    if (!gp) return 0.0f;
+
+    Sint16 value = SDL_GetGamepadAxis(gp, MapAxis(axis));
     return value / 32767.0f; // Normalize to -1.0 to 1.0
 }

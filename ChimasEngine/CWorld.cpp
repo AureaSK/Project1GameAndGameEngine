@@ -7,10 +7,14 @@
 #include <box2d.h>
 #include <iostream>
 
-CWorld::CWorld(CEngine* engineRef, float x, float y)
-    : engine(engineRef), pixelsPerMeter(50.0f), worldBounds(x, y), GameRunning(true)
+struct CWorld::WorldImpl
 {
-    worldId = b2_nullWorldId;
+    b2WorldId worldId = b2_nullWorldId;
+};
+
+CWorld::CWorld(CEngine* engineRef, float x, float y)
+    : engine(engineRef), impl(new WorldImpl()), pixelsPerMeter(50.0f), worldBounds(x, y), GameRunning(true)
+{
     SDL_Log("CWorld created");
 }
 
@@ -27,11 +31,14 @@ CWorld::~CWorld()
     pendingActors.clear();
 
     // Destroy Box2D world
-    if (!B2_IS_NULL(worldId))
+    if (impl && !B2_IS_NULL(impl->worldId))
     {
-        b2DestroyWorld(worldId);
-        worldId = b2_nullWorldId;
+        b2DestroyWorld(impl->worldId);
+        impl->worldId = b2_nullWorldId;
     }
+
+    delete impl;
+    impl = nullptr;
 }
 
 void CWorld::InitializePhysics(const Vector2& gravity)
@@ -42,9 +49,9 @@ void CWorld::InitializePhysics(const Vector2& gravity)
     // NOTE: In Box2D v3.1, contact events are enabled PER SHAPE, not on the world
     // See b2ShapeDef.enableContactEvents
 
-    worldId = b2CreateWorld(&worldDef);
+    impl->worldId = b2CreateWorld(&worldDef);
 
-    if (B2_IS_NULL(worldId)) {
+    if (B2_IS_NULL(impl->worldId)) {
         SDL_Log("FAILED to create Box2D world!");
     }
     else {
@@ -54,20 +61,20 @@ void CWorld::InitializePhysics(const Vector2& gravity)
 
 void CWorld::StepPhysics(float deltaTime)
 {
-    if (B2_IS_NULL(worldId)) return;
+    if (!impl || B2_IS_NULL(impl->worldId)) return;
 
     int32_t subStepCount = 4;
-    b2World_Step(worldId, deltaTime, subStepCount);
+    b2World_Step(impl->worldId, deltaTime, subStepCount);
 }
 
 void CWorld::ProcessCollisions()
 {
-    if (B2_IS_NULL(worldId)) return;
+    if (!impl || B2_IS_NULL(impl->worldId)) return;
 
     collisionPairs.clear();
 
     // Get all contact events
-    b2ContactEvents events = b2World_GetContactEvents(worldId);
+    b2ContactEvents events = b2World_GetContactEvents(impl->worldId);
 
     // Process begin touch events
     for (int i = 0; i < events.beginCount; i++)
@@ -141,7 +148,7 @@ void CWorld::CreateBoundaryWalls(float width, float height)
 {
    
 
-    if (B2_IS_NULL(worldId))
+    if (!impl || B2_IS_NULL(impl->worldId))
     {
         SDL_Log("Error: Physics world not initialized!");
         return;
@@ -170,28 +177,28 @@ void CWorld::CreateBoundaryWalls(float width, float height)
 
     // Bottom wall
     bodyDef.position = { halfWidth, height / pixelsPerMeter + wallThickness / 2.0f };
-    b2BodyId bottomBody = b2CreateBody(worldId, &bodyDef);
+    b2BodyId bottomBody = b2CreateBody(impl->worldId, &bodyDef);
     b2Polygon bottomBox = b2MakeBox(halfWidth, wallThickness / 2.0f);
     b2CreatePolygonShape(bottomBody, &shapeDef, &bottomBox);
     SDL_Log("✓ Bottom wall created");
 
     // Top wall
     bodyDef.position = { halfWidth, -wallThickness / 2.0f };
-    b2BodyId topBody = b2CreateBody(worldId, &bodyDef);
+    b2BodyId topBody = b2CreateBody(impl->worldId, &bodyDef);
     b2Polygon topBox = b2MakeBox(halfWidth, wallThickness / 2.0f);
     b2CreatePolygonShape(topBody, &shapeDef, &topBox);
     SDL_Log("✓ Top wall created");
 
     // Left wall
     bodyDef.position = { -wallThickness / 2.0f, halfHeight };
-    b2BodyId leftBody = b2CreateBody(worldId, &bodyDef);
+    b2BodyId leftBody = b2CreateBody(impl->worldId, &bodyDef);
     b2Polygon leftBox = b2MakeBox(wallThickness / 2.0f, halfHeight);
     b2CreatePolygonShape(leftBody, &shapeDef, &leftBox);
     SDL_Log("✓ Left wall created");
 
     // Right wall
     bodyDef.position = { width / pixelsPerMeter + wallThickness / 2.0f, halfHeight };
-    b2BodyId rightBody = b2CreateBody(worldId, &bodyDef);
+    b2BodyId rightBody = b2CreateBody(impl->worldId, &bodyDef);
     b2Polygon rightBox = b2MakeBox(wallThickness / 2.0f, halfHeight);
     b2CreatePolygonShape(rightBody, &shapeDef, &rightBox);
     SDL_Log("Right wall created");
@@ -199,14 +206,14 @@ void CWorld::CreateBoundaryWalls(float width, float height)
     SDL_Log("All boundary walls created - Contact events ENABLED");
 }
 
-Vector2 CWorld::ToPixels(b2Vec2 meters) const
+Vector2 CWorld::ToPixels(Vector2 meters) const
 {
     return Vector2(meters.x * pixelsPerMeter, meters.y * pixelsPerMeter);
 }
 
-b2Vec2 CWorld::ToMeters(Vector2 pixels) const
+Vector2 CWorld::ToMeters(Vector2 pixels) const
 {
-    return { pixels.x / pixelsPerMeter, pixels.y / pixelsPerMeter };
+    return Vector2(pixels.x / pixelsPerMeter, pixels.y / pixelsPerMeter);
 }
 
 float CWorld::ToPixels(float meters) const
@@ -217,6 +224,15 @@ float CWorld::ToPixels(float meters) const
 float CWorld::ToMeters(float pixels) const
 {
     return pixels / pixelsPerMeter;
+}
+
+PhysicsWorldHandle CWorld::GetPhysicsWorldHandle() const
+{
+    PhysicsWorldHandle h;
+    if (!impl) return h;
+    h.index1 = impl->worldId.index1;
+    h.generation = impl->worldId.generation;
+    return h;
 }
 
 void CWorld::DestroyActor(CActor* actor)

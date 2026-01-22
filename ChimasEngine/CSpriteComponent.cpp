@@ -3,13 +3,15 @@
 #include "CWorld.h"
 #include "CEngine.h"
 #include "CEngineRender.h"
+#include "ChimasLog.h"
+#include <SDL3/SDL.h>
 
 CSpriteComponent::CSpriteComponent(CActor* owner)
     : CComponent(owner), texture(nullptr), ownsTexture(false), useSourceRect(false),
-    alpha(1.0f), tintColor(Color::White()), flipMode(SDL_FLIP_NONE)
+    alpha(1.0f), tintColor(Color::White()), flipMode(FlipMode::None)
 {
-    renderRect = { 0.0f, 0.0f, 64.0f, 64.0f };
-    sourceRect = { 0.0f, 0.0f, 0.0f, 0.0f };
+    renderRect = RectF(0.0f, 0.0f, 64.0f, 64.0f);
+    sourceRect = RectF(0.0f, 0.0f, 0.0f, 0.0f);
 }
 
 CSpriteComponent::~CSpriteComponent()
@@ -48,14 +50,14 @@ bool CSpriteComponent::LoadTexture(const std::string& path)
     CWorld* world = owner->GetWorld();
     if (!world)
     {
-        SDL_Log("CSpriteComponent: No world available!");
+        ChimasLog::Info("CSpriteComponent: No world available!");
         return false;
     }
 
     CEngine* engine = world->GetEngine();
     if (!engine || !engine->GetRenderer())
     {
-        SDL_Log("CSpriteComponent: No engine or renderer available!");
+        ChimasLog::Info("CSpriteComponent: No engine or renderer available!");
         return false;
     }
 
@@ -65,15 +67,15 @@ bool CSpriteComponent::LoadTexture(const std::string& path)
     texture = new CEngineTexture();
     if (!texture->LoadFromFile(resolvedPath))  // ✅ Use resolved path
     {
-        SDL_Log("CSpriteComponent: Failed to load '%s'", resolvedPath.c_str());
+        ChimasLog::Info("CSpriteComponent: Failed to load '%s'", resolvedPath.c_str());
         delete texture;
         texture = nullptr;
         return false;
     }
 
-    if (!texture->CreateTexture(engine->GetRenderer()->GetSDLRenderer()))
+    if (!texture->CreateTexture(static_cast<void*>(engine->GetRenderer()->GetSDLRenderer())))
     {
-        SDL_Log("CSpriteComponent: Failed to create GPU texture");
+        ChimasLog::Info("CSpriteComponent: Failed to create GPU texture");
         delete texture;
         texture = nullptr;
         return false;
@@ -83,7 +85,7 @@ bool CSpriteComponent::LoadTexture(const std::string& path)
     renderRect.w = static_cast<float>(texture->GetWidth());
     renderRect.h = static_cast<float>(texture->GetHeight());
 
-    SDL_Log("CSpriteComponent: Loaded '%s' (%dx%d)",
+    ChimasLog::Info("CSpriteComponent: Loaded '%s' (%dx%d)",
         resolvedPath.c_str(), texture->GetWidth(), texture->GetHeight());
 
     return true;
@@ -108,7 +110,7 @@ void CSpriteComponent::SetTexture(CEngineTexture* tex)
 
 void CSpriteComponent::Render(const Vector2& position, float rotation)
 {
-    if (!texture || !texture->GetTexture() || !isActive)
+    if (!texture || !texture->GetNativeTexture() || !isActive)
     {
         return;
     }
@@ -127,13 +129,27 @@ void CSpriteComponent::Render(const Vector2& position, float rotation)
     renderRect.y = position.y - (renderRect.h / 2.0f);
 
     // Apply visual properties
-    SDL_SetTextureAlphaMod(texture->GetTexture(), static_cast<Uint8>(alpha * 255));
-    SDL_SetTextureColorMod(texture->GetTexture(), tintColor.r, tintColor.g, tintColor.b);
+    SDL_Texture* sdlTex = static_cast<SDL_Texture*>(texture->GetNativeTexture());
+    SDL_SetTextureAlphaMod(sdlTex, static_cast<Uint8>(alpha * 255));
+    SDL_SetTextureColorMod(sdlTex, tintColor.r, tintColor.g, tintColor.b);
 
-    // Render
-    const SDL_FRect* srcRect = useSourceRect ? &sourceRect : nullptr;
-    SDL_RenderTextureRotated(renderer, texture->GetTexture(),
-        srcRect, &renderRect, rotation, nullptr, flipMode);
+    // Render (convert engine RectF -> SDL_FRect)
+    SDL_FRect dst{ renderRect.x, renderRect.y, renderRect.w, renderRect.h };
+    SDL_FRect src{ sourceRect.x, sourceRect.y, sourceRect.w, sourceRect.h };
+
+    const SDL_FRect* srcPtr = useSourceRect ? &src : nullptr;
+
+    SDL_FlipMode sdlFlip = SDL_FLIP_NONE;
+    switch (flipMode)
+    {
+    case FlipMode::Horizontal: sdlFlip = SDL_FLIP_HORIZONTAL; break;
+    case FlipMode::Vertical: sdlFlip = SDL_FLIP_VERTICAL; break;
+    case FlipMode::None:
+    default: sdlFlip = SDL_FLIP_NONE; break;
+    }
+
+    SDL_RenderTextureRotated(renderer, sdlTex,
+        srcPtr, &dst, rotation, nullptr, sdlFlip);
 }
 
 void CSpriteComponent::SetSize(float width, float height)
@@ -144,7 +160,7 @@ void CSpriteComponent::SetSize(float width, float height)
 
 void CSpriteComponent::SetSourceRect(float x, float y, float w, float h)
 {
-    sourceRect = { x, y, w, h };
+    sourceRect = RectF(x, y, w, h);
     useSourceRect = true;
 }
 

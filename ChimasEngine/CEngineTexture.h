@@ -3,14 +3,15 @@
 #include "pch.h"
 #include "CEngine.h"
 #include <string>
-#include <SDL3/SDL.h>
 
 // NO inheritance - Texture is a resource holder
 class CEngineTexture : public CEngine
 {
 private:
-    SDL_Surface* surface;
-    SDL_Texture* sdlTexture;
+    // Hide SDL_Surface/SDL_Texture from game code (PIMPL)
+    struct Impl;
+    Impl* impl;
+
     int width;
     int height;
 
@@ -22,13 +23,12 @@ public:
     bool LoadFromFile(const std::string& path);
 
     // Create SDL_Texture from loaded surface
-    bool CreateTexture(SDL_Renderer* renderer);
+    bool CreateTexture(void* nativeRenderer);
 
     void Destroy();
 
     // Getters
-    SDL_Surface* GetSurface() const { return surface; }
-    SDL_Texture* GetTexture() const { return sdlTexture; }
+    void* GetNativeTexture() const;
     int GetWidth() const { return width; }
     int GetHeight() const { return height; }
 

@@ -1,12 +1,13 @@
 ﻿#pragma once
 #include <vector>
-#include <box2d.h>
 #include "ChimasUtilities.h"
+#include "ChimasPhysicsHandles.h"
 
 // Forward declarations
 class CActor;
 class CEngine;
 class CEngineRender;
+class CPhysicsComponent;
 
 class CWorld
 {
@@ -15,10 +16,10 @@ private:
     std::vector<CActor*> actors;
     std::vector<CActor*> pendingActors;
 
-    
+    // Hide Box2D implementation details from game code (PIMPL)
+    struct WorldImpl;
+    WorldImpl* impl;
 
-    // Box2D Physics
-    b2WorldId worldId;
     float pixelsPerMeter;
     Vector2 worldBounds; // Screen size
 
@@ -67,16 +68,20 @@ public:
     void CreateBoundaryWalls(float width, float height);
     void ProcessCollisions(); // NEW: Process collision events
 
-    b2WorldId GetPhysicsWorld() const { return worldId; }
     float GetPixelsPerMeter() const { return pixelsPerMeter; }
     Vector2 GetWorldBounds() const { return worldBounds; }
 
     // Conversion helpers
-    Vector2 ToPixels(b2Vec2 meters) const;
-    b2Vec2 ToMeters(Vector2 pixels) const;
+    Vector2 ToPixels(Vector2 meters) const;
+    Vector2 ToMeters(Vector2 pixels) const;
     float ToPixels(float meters) const;
     float ToMeters(float pixels) const;
 
     // Utility
     const std::vector<CActor*>& GetActors() const { return actors; }
+
+private:
+    // Engine-internal hook (world id is owned by engine, but exposed to engine code only)
+    PhysicsWorldHandle GetPhysicsWorldHandle() const;
+    friend class CPhysicsComponent;
 };

@@ -1,6 +1,6 @@
 #pragma once
 #include "CEngine.h"
-#include <SDL3/SDL.h>
+#include "ChimasInput.h"
 #include <unordered_map>
 
 class CInputManager : public CEngine
@@ -8,12 +8,13 @@ class CInputManager : public CEngine
 private:
     const bool* keyboardState;
     int numKeys;
-    std::unordered_map<SDL_Keycode, bool> keyPressed;
-    std::unordered_map<SDL_Keycode, bool> keyReleased;
 
-    SDL_Gamepad* gamepad;
-    std::unordered_map<SDL_GamepadButton, bool> buttonPressed;
-    std::unordered_map<SDL_GamepadButton, bool> buttonReleased;
+    std::unordered_map<Key, bool> keyPressed;
+    std::unordered_map<Key, bool> keyReleased;
+
+    void* gamepad; // SDL_Gamepad* stored opaquely; defined/used in .cpp only
+    std::unordered_map<GamepadButton, bool> buttonPressed;
+    std::unordered_map<GamepadButton, bool> buttonReleased;
 
     static CInputManager* instance;
 
@@ -25,17 +26,17 @@ public:
 
     void Initialize();
     void Update();
-    void ProcessEvent(const SDL_Event& event);
+    void ProcessNativeEvent(const void* nativeEvent);
     void Cleanup();
 
     // Keyboard
-    bool IsKeyDown(SDL_Keycode key) const;
-    bool IsKeyPressed(SDL_Keycode key) const;
-    bool IsKeyReleased(SDL_Keycode key) const;
+    bool IsKeyDown(Key key) const;
+    bool IsKeyPressed(Key key) const;
+    bool IsKeyReleased(Key key) const;
 
     // Gamepad
-    bool IsButtonDown(SDL_GamepadButton button) const;
-    bool IsButtonPressed(SDL_GamepadButton button) const;
-    bool IsButtonReleased(SDL_GamepadButton button) const;
-    float GetAxis(SDL_GamepadAxis axis) const;
+    bool IsButtonDown(GamepadButton button) const;
+    bool IsButtonPressed(GamepadButton button) const;
+    bool IsButtonReleased(GamepadButton button) const;
+    float GetAxis(GamepadAxis axis) const;
 };

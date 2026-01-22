@@ -1,7 +1,7 @@
 #pragma once
 #include "CComponent.h"
-#include <box2d.h>
 #include "ChimasUtilities.h"
+#include "ChimasPhysicsHandles.h"
 
 enum class BodyType
 {
@@ -23,8 +23,10 @@ namespace CollisionCategory
 class CPhysicsComponent : public CComponent
 {
 private:
-    b2BodyId bodyId;
-    b2ShapeId shapeId;
+    // Hide Box2D body/shape ids from game code
+    struct Impl;
+    Impl* impl;
+
     BodyType bodyType;
     uint32_t collisionCategory;
     uint32_t collisionMask;
@@ -49,6 +51,4 @@ public:
     // Physics control
     void SetVelocity(const Vector2& velocity);
     Vector2 GetVelocity() const;
-
-    b2BodyId GetBodyId() const { return bodyId; }
 };

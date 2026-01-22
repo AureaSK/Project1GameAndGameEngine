@@ -2,6 +2,7 @@
 #include "Explosion.h"
 #include "CSpriteComponent.h"
 #include "CAnimationComponent.h"
+#include "ChimasLog.h"
 
 Explosion::Explosion(CWorld* world)
     : CActor(world), sprite(nullptr), animation(nullptr), lifetime(.6f)
@@ -31,7 +32,7 @@ void Explosion::BeginPlay()
 
     animation->PlayAnimation("explode");
 
-    SDL_Log("Explosion spawned at (%.1f, %.1f)", transform.position.x, transform.position.y);
+    ChimasLog::Info("Explosion spawned at (%.1f, %.1f)", transform.position.x, transform.position.y);
 }
 
 void Explosion::Tick(float deltaTime)
