@@ -103,7 +103,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(SolutionDir)/ChimasEngine;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -144,6 +144,11 @@
     <ClInclude Include="PlayerController.h" />
     <ClInclude Include="Rusher.h" />
     <ClInclude Include="SpaceshipPawn.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ChimasEngine\ChimasEngine.vcxproj">
+      <Project>{4db20fe9-9254-43ee-87c7-ffff1e00a876}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

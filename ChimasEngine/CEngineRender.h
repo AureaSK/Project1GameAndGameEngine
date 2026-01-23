@@ -5,11 +5,12 @@
 // Forward declaration
 class CEngineWindow;
 
-// NO inheritance - Renderer is a standalone component
+// PIMPL to hide OpenGL/GLAD from game code
 class CEngineRender
 {
 private:
-    SDL_Renderer* sdlRenderer;
+    struct Impl;
+    Impl* impl;
 
 public:
     CEngineRender();
@@ -24,12 +25,12 @@ public:
     void SetDrawColor(const Color& color);
     void DrawRect(const SDL_FRect& rect, const Color& color);
 
-    // Texture rendering
-    void DrawTexture(SDL_Texture* texture, const SDL_FRect* srcRect, const SDL_FRect* destRect, float rotation = 0.0f);
+    // Texture rendering (uses void* to hide OpenGL types)
+    void DrawTexture(void* texture, const SDL_FRect* srcRect, const SDL_FRect* destRect, float rotation = 0.0f);
 
     // Texture creation helper
-    SDL_Texture* CreateTextureFromSurface(SDL_Surface* surface);
+    void* CreateTextureFromSurface(SDL_Surface* surface);
 
-    // Getter
-    SDL_Renderer* GetSDLRenderer() const { return sdlRenderer; }
+    // Internal access (for CEngineTexture)
+    void* GetInternalContext() const;
 };
