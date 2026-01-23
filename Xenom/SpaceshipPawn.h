@@ -5,6 +5,7 @@
 class CSpriteComponent;
 class CAnimationComponent;
 class CPhysicsComponent;
+class HPComponent;
 
 class SpaceshipPawn : public CPawn
 {
