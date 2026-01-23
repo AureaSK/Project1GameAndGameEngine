@@ -106,11 +106,8 @@ void CEngine::Initialize(const char* title, int width, int height, const char* a
         return;
     }
 
-
-    ;
     world = new CWorld(this, width, height);
 
-    
     world->InitializePhysics(Vector2(0.0f, 0.0f));
     world->CreateBoundaryWalls(static_cast<float>(width), static_cast<float>(height));
 
@@ -119,7 +116,7 @@ void CEngine::Initialize(const char* title, int width, int height, const char* a
 
     CEngineTexture* background = new CEngineTexture();
     if (background->LoadFromFile(resolvedPath)) {
-        if (background->CreateTexture(static_cast<void*>(renderer->GetSDLRenderer()))) {
+        if (background->CreateTexture(nullptr)) {
             textures.push_back(background);
         }
         else {
@@ -136,7 +133,6 @@ void CEngine::Initialize(const char* title, int width, int height, const char* a
 
 void CEngine::GameLoop()
 {
-    //bRunning = true;
     Uint64 lastTime = SDL_GetTicks();
     float deltaTime = 0.0f;
 
@@ -151,10 +147,9 @@ void CEngine::GameLoop()
             deltaTime = 0.05f;
         }
 
-        // Unity execution order:
-        ProcessInput();      // Input handling
-        Update(deltaTime);   // Update phase
-        Render();            // Render phase
+        ProcessInput();
+        Update(deltaTime);
+        Render();
 
         SDL_Delay(16); // ~60 FPS
     }
@@ -197,8 +192,8 @@ void CEngine::Render()
     if (!textures.empty() && textures[0]) {
         CEngineTexture* bg = textures[0];
         if (bg->GetNativeTexture()) {
-            SDL_FRect destRect = { 0.0f, 0.0f, Width, Height};
-            renderer->DrawTexture(static_cast<SDL_Texture*>(bg->GetNativeTexture()), nullptr, &destRect);
+            SDL_FRect destRect = { 0.0f, 0.0f, static_cast<float>(Width), static_cast<float>(Height) };
+            renderer->DrawTexture(bg->GetNativeTexture(), nullptr, &destRect);
         }
     }
 

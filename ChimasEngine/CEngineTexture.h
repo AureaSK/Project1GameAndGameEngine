@@ -1,14 +1,12 @@
 #pragma once
-
 #include "pch.h"
 #include "CEngine.h"
 #include <string>
 
-// NO inheritance - Texture is a resource holder
+// OpenGL-based texture (PIMPL hides GLAD completely)
 class CEngineTexture : public CEngine
 {
 private:
-    // Hide SDL_Surface/SDL_Texture from game code (PIMPL)
     struct Impl;
     Impl* impl;
 
@@ -22,7 +20,7 @@ public:
     // Load from file (creates surface only)
     bool LoadFromFile(const std::string& path);
 
-    // Create SDL_Texture from loaded surface
+    // Create OpenGL texture from loaded surface
     bool CreateTexture(void* nativeRenderer);
 
     void Destroy();

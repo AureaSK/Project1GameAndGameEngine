@@ -61,11 +61,11 @@ bool CSpriteComponent::LoadTexture(const std::string& path)
         return false;
     }
 
-    // ✅ ADD THIS: Resolve the asset path using engine's logic
+    // Resolve the asset path using engine's logic
     std::string resolvedPath = engine->ResolveAssetPath(path.c_str());
 
     texture = new CEngineTexture();
-    if (!texture->LoadFromFile(resolvedPath))  // ✅ Use resolved path
+    if (!texture->LoadFromFile(resolvedPath))
     {
         ChimasLog::Info("CSpriteComponent: Failed to load '%s'", resolvedPath.c_str());
         delete texture;
@@ -73,7 +73,8 @@ bool CSpriteComponent::LoadTexture(const std::string& path)
         return false;
     }
 
-    if (!texture->CreateTexture(static_cast<void*>(engine->GetRenderer()->GetSDLRenderer())))
+    // OpenGL doesn't need the renderer reference
+    if (!texture->CreateTexture(nullptr))
     {
         ChimasLog::Info("CSpriteComponent: Failed to create GPU texture");
         delete texture;
@@ -122,34 +123,23 @@ void CSpriteComponent::Render(const Vector2& position, float rotation)
     CEngine* engine = world->GetEngine();
     if (!engine || !engine->GetRenderer()) return;
 
-    SDL_Renderer* renderer = engine->GetRenderer()->GetSDLRenderer();
+    CEngineRender* renderer = engine->GetRenderer();
 
     // Center sprite on actor position
     renderRect.x = position.x - (renderRect.w / 2.0f);
     renderRect.y = position.y - (renderRect.h / 2.0f);
 
-    // Apply visual properties
-    SDL_Texture* sdlTex = static_cast<SDL_Texture*>(texture->GetNativeTexture());
-    SDL_SetTextureAlphaMod(sdlTex, static_cast<Uint8>(alpha * 255));
-    SDL_SetTextureColorMod(sdlTex, tintColor.r, tintColor.g, tintColor.b);
-
-    // Render (convert engine RectF -> SDL_FRect)
+    // Convert to SDL_FRect
     SDL_FRect dst{ renderRect.x, renderRect.y, renderRect.w, renderRect.h };
     SDL_FRect src{ sourceRect.x, sourceRect.y, sourceRect.w, sourceRect.h };
 
     const SDL_FRect* srcPtr = useSourceRect ? &src : nullptr;
 
-    SDL_FlipMode sdlFlip = SDL_FLIP_NONE;
-    switch (flipMode)
-    {
-    case FlipMode::Horizontal: sdlFlip = SDL_FLIP_HORIZONTAL; break;
-    case FlipMode::Vertical: sdlFlip = SDL_FLIP_VERTICAL; break;
-    case FlipMode::None:
-    default: sdlFlip = SDL_FLIP_NONE; break;
-    }
+    // Draw with OpenGL renderer
+    renderer->DrawTexture(texture->GetNativeTexture(), srcPtr, &dst, rotation);
 
-    SDL_RenderTextureRotated(renderer, sdlTex,
-        srcPtr, &dst, rotation, nullptr, sdlFlip);
+    // Note: Alpha, tint color, and flip modes are not yet implemented in OpenGL renderer
+    // These can be added later by extending the shader system
 }
 
 void CSpriteComponent::SetSize(float width, float height)
