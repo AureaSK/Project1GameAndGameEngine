@@ -8,6 +8,9 @@ private:
 	float valueToChange;
 
 public:
+	HPComponent(float setMaxHp);
+
+	virtual ~HPComponent();
 
 	void ChangeHP(float valueToChange);
 	float GetCurrentHP() { return currentHP;};
