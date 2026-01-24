@@ -7,7 +7,7 @@
 #include <cmath>
 #include <cstring>
 
-// Simple 2D matrix implementation
+// 2D matrix implementation
 struct Mat4 {
     float m[16];
     Mat4();
@@ -279,7 +279,7 @@ void CEngineRender::DrawRect(const SDL_FRect& rect, const Color& color)
     glBindVertexArray(0);
 }
 
-void CEngineRender::DrawTexture(void* texture, const SDL_FRect* srcRect, const SDL_FRect* destRect, float rotation)
+void CEngineRender::DrawTexture(void* texture, const SDL_FRect* srcRect, const SDL_FRect* destRect, float rotation, int textureWidth, int textureHeight)
 {
     GLuint texID = static_cast<GLuint>(reinterpret_cast<uintptr_t>(texture));
     if (!texID || !destRect || !impl->shader) return;
@@ -287,6 +287,21 @@ void CEngineRender::DrawTexture(void* texture, const SDL_FRect* srcRect, const S
     impl->shader->Use();
     impl->shader->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
     impl->shader->SetUseTexture(true);
+
+    // Calculate texture coordinates for sprite sheets
+    if (srcRect && textureWidth > 0 && textureHeight > 0) {
+        // Convert pixel coordinates to normalized UV coordinates (0.0 to 1.0)
+        float offsetX = srcRect->x / static_cast<float>(textureWidth);
+        float offsetY = srcRect->y / static_cast<float>(textureHeight);
+        float scaleX = srcRect->w / static_cast<float>(textureWidth);
+        float scaleY = srcRect->h / static_cast<float>(textureHeight);
+        
+        impl->shader->SetTextureCoordinates(offsetX, offsetY, scaleX, scaleY);
+    }
+    else {
+        // No source rect or texture dimensions - use full texture
+        impl->shader->SetTextureCoordinates(0.0f, 0.0f, 1.0f, 1.0f);
+    }
 
     Mat4 model;
     if (rotation != 0.0f) {

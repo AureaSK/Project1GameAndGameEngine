@@ -1,4 +1,4 @@
-﻿#include "pch.h"
+#include "pch.h"
 #include "CEngine.h"
 #include "CEngineWindow.h"
 #include "CEngineRender.h"
@@ -193,7 +193,7 @@ void CEngine::Render()
         CEngineTexture* bg = textures[0];
         if (bg->GetNativeTexture()) {
             SDL_FRect destRect = { 0.0f, 0.0f, static_cast<float>(Width), static_cast<float>(Height) };
-            renderer->DrawTexture(bg->GetNativeTexture(), nullptr, &destRect);
+            renderer->DrawTexture(bg->GetNativeTexture(), nullptr, &destRect, 0.0f, bg->GetWidth(), bg->GetHeight());
         }
     }
 

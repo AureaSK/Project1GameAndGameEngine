@@ -3,7 +3,7 @@
 #include "CActor.h"
 #include "ChimasLog.h"
 
-// Change constructor to match header
+
 CAnimationComponent::CAnimationComponent(CActor* owner)
     : CComponent(owner), sprite(nullptr), currentAnimation(-1),
     currentFrame(0), frameTimer(0.0f), tileWidth(0),
@@ -30,7 +30,6 @@ void CAnimationComponent::BeginPlay()
     }
 }
 
-// ... rest of the existing CAnimationComponent.cpp code remains the same ...
 
 void CAnimationComponent::Tick(float deltaTime)
 {

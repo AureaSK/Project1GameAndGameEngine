@@ -26,7 +26,8 @@ public:
     void DrawRect(const SDL_FRect& rect, const Color& color);
 
     // Texture rendering (uses void* to hide OpenGL types)
-    void DrawTexture(void* texture, const SDL_FRect* srcRect, const SDL_FRect* destRect, float rotation = 0.0f);
+    // textureWidth and textureHeight are needed for sprite sheet UV calculations
+    void DrawTexture(void* texture, const SDL_FRect* srcRect, const SDL_FRect* destRect, float rotation = 0.0f, int textureWidth = 0, int textureHeight = 0);
 
     // Texture creation helper
     void* CreateTextureFromSurface(SDL_Surface* surface);

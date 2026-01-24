@@ -11,6 +11,8 @@ private:
     GLint uModel;
     GLint uColor;
     GLint uUseTexture;
+    GLint uTexOffset;
+    GLint uTexScale;
 
     GLuint CompileShader(GLenum type, const char* source);
     bool LinkProgram(GLuint vertexShader, GLuint fragmentShader);
@@ -30,6 +32,7 @@ public:
     void SetModelMatrix(const float* matrix) const;
     void SetColor(float r, float g, float b, float a) const;
     void SetUseTexture(bool useTexture) const;
+    void SetTextureCoordinates(float offsetX, float offsetY, float scaleX, float scaleY) const;
 
     // Get uniform locations (for direct access if needed)
     GLint GetProjectionLocation() const { return uProjection; }

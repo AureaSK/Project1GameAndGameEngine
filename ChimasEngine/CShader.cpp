@@ -42,7 +42,7 @@ static std::string LoadShaderFile(const char* filepath)
             if (shaderFile.is_open()) {
                 shaderFile.close();
             }
-            // Try next path
+            
         }
     }
 
@@ -51,7 +51,7 @@ static std::string LoadShaderFile(const char* filepath)
 }
 
 CShader::CShader()
-    : shaderProgram(0), uProjection(-1), uModel(-1), uColor(-1), uUseTexture(-1)
+    : shaderProgram(0), uProjection(-1), uModel(-1), uColor(-1), uUseTexture(-1), uTexOffset(-1), uTexScale(-1)
 {
 }
 
@@ -110,6 +110,8 @@ bool CShader::LinkProgram(GLuint vertexShader, GLuint fragmentShader)
     uModel = glGetUniformLocation(shaderProgram, "model");
     uColor = glGetUniformLocation(shaderProgram, "color");
     uUseTexture = glGetUniformLocation(shaderProgram, "useTexture");
+    uTexOffset = glGetUniformLocation(shaderProgram, "texOffset");
+    uTexScale = glGetUniformLocation(shaderProgram, "texScale");
 
     return true;
 }
@@ -192,5 +194,15 @@ void CShader::SetUseTexture(bool useTexture) const
 {
     if (uUseTexture >= 0 && shaderProgram != 0) {
         glUniform1i(uUseTexture, useTexture ? 1 : 0);
+    }
+}
+
+void CShader::SetTextureCoordinates(float offsetX, float offsetY, float scaleX, float scaleY) const
+{
+    if (uTexOffset >= 0 && shaderProgram != 0) {
+        glUniform2f(uTexOffset, offsetX, offsetY);
+    }
+    if (uTexScale >= 0 && shaderProgram != 0) {
+        glUniform2f(uTexScale, scaleX, scaleY);
     }
 }
