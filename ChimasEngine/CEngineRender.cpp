@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "CEngineRender.h"
 #include "CEngineWindow.h"
+#include "CShader.h"
 #include <SDL3/SDL.h>
 #include <glad/glad.h>
 #include <cmath>
@@ -78,130 +79,38 @@ Mat4 Mat4::operator*(const Mat4& other) const
     return result;
 }
 
-// Vertex shader source
-const char* vertexShaderSource = R"(
-#version 330 core
-layout (location = 0) in vec2 aPos;
-layout (location = 1) in vec2 aTexCoord;
-
-out vec2 TexCoord;
-
-uniform mat4 projection;
-uniform mat4 model;
-
-void main()
-{
-    gl_Position = projection * model * vec4(aPos, 0.0, 1.0);
-    TexCoord = aTexCoord;
-}
-)";
-
-// Fragment shader source
-const char* fragmentShaderSource = R"(
-#version 330 core
-out vec4 FragColor;
-
-in vec2 TexCoord;
-
-uniform vec4 color;
-uniform bool useTexture;
-uniform sampler2D texture0;
-
-void main()
-{
-    if (useTexture) {
-        FragColor = texture(texture0, TexCoord) * color;
-    } else {
-        FragColor = color;
-    }
-}
-)";
-
 // PIMPL Implementation
 struct CEngineRender::Impl
 {
     SDL_GLContext glContext;
     SDL_Window* window;
 
-    GLuint shaderProgram;
+    CShader* shader;
     GLuint quadVAO, quadVBO;
-
-    GLint uProjection;
-    GLint uModel;
-    GLint uColor;
-    GLint uUseTexture;
 
     Color currentColor;
     int viewportWidth;
     int viewportHeight;
     Mat4 projectionMatrix;
 
-    Impl() : glContext(nullptr), window(nullptr), shaderProgram(0),
-        quadVAO(0), quadVBO(0), uProjection(-1), uModel(-1),
-        uColor(-1), uUseTexture(-1), currentColor{ 0, 0, 0, 255 },
+    Impl() : glContext(nullptr), window(nullptr), shader(nullptr),
+        quadVAO(0), quadVBO(0), currentColor{ 0, 0, 0, 255 },
         viewportWidth(0), viewportHeight(0) {
     }
 
-    GLuint CompileShader(GLenum type, const char* source);
     bool CreateShaders();
     bool CreateQuadBuffers();
     void UpdateProjectionMatrix();
 };
 
-GLuint CEngineRender::Impl::CompileShader(GLenum type, const char* source)
-{
-    GLuint shader = glCreateShader(type);
-    glShaderSource(shader, 1, &source, nullptr);
-    glCompileShader(shader);
-
-    GLint success;
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        char infoLog[512];
-        glGetShaderInfoLog(shader, 512, nullptr, infoLog);
-        SDL_Log("Shader compilation failed: %s", infoLog);
-        glDeleteShader(shader);
-        return 0;
-    }
-
-    return shader;
-}
-
 bool CEngineRender::Impl::CreateShaders()
 {
-    GLuint vertexShader = CompileShader(GL_VERTEX_SHADER, vertexShaderSource);
-    if (!vertexShader) return false;
-
-    GLuint fragmentShader = CompileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
-    if (!fragmentShader) {
-        glDeleteShader(vertexShader);
+    shader = new CShader();
+    if (!shader->Initialize(nullptr, nullptr)) {
+        delete shader;
+        shader = nullptr;
         return false;
     }
-
-    shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-
-    GLint success;
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success) {
-        char infoLog[512];
-        glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
-        SDL_Log("Shader linking failed: %s", infoLog);
-        glDeleteShader(vertexShader);
-        glDeleteShader(fragmentShader);
-        return false;
-    }
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
-    uProjection = glGetUniformLocation(shaderProgram, "projection");
-    uModel = glGetUniformLocation(shaderProgram, "model");
-    uColor = glGetUniformLocation(shaderProgram, "color");
-    uUseTexture = glGetUniformLocation(shaderProgram, "useTexture");
-
     return true;
 }
 
@@ -237,9 +146,11 @@ bool CEngineRender::Impl::CreateQuadBuffers()
 
 void CEngineRender::Impl::UpdateProjectionMatrix()
 {
-    glUseProgram(shaderProgram);
-    projectionMatrix = Mat4::Ortho(0.0f, (float)viewportWidth, (float)viewportHeight, 0.0f);
-    glUniformMatrix4fv(uProjection, 1, GL_FALSE, projectionMatrix.m);
+    if (shader) {
+        projectionMatrix = Mat4::Ortho(0.0f, (float)viewportWidth, (float)viewportHeight, 0.0f);
+        shader->Use();
+        shader->SetProjectionMatrix(projectionMatrix.m);
+    }
 }
 
 // Public interface
@@ -322,9 +233,9 @@ void CEngineRender::Destroy()
         glDeleteBuffers(1, &impl->quadVBO);
         impl->quadVBO = 0;
     }
-    if (impl->shaderProgram) {
-        glDeleteProgram(impl->shaderProgram);
-        impl->shaderProgram = 0;
+    if (impl->shader) {
+        delete impl->shader;
+        impl->shader = nullptr;
     }
     if (impl->glContext) {
         SDL_GL_DestroyContext(impl->glContext);
@@ -351,16 +262,17 @@ void CEngineRender::SetDrawColor(const Color& color)
 
 void CEngineRender::DrawRect(const SDL_FRect& rect, const Color& color)
 {
-    glUseProgram(impl->shaderProgram);
+    if (!impl->shader) return;
 
-    glUniform4f(impl->uColor, color.r / 255.0f, color.g / 255.0f, color.b / 255.0f, color.a / 255.0f);
-    glUniform1i(impl->uUseTexture, 0);
+    impl->shader->Use();
+    impl->shader->SetColor(color.r / 255.0f, color.g / 255.0f, color.b / 255.0f, color.a / 255.0f);
+    impl->shader->SetUseTexture(false);
 
     Mat4 translate = Mat4::Translate(rect.x, rect.y);
     Mat4 scale = Mat4::Scale(rect.w, rect.h);
     Mat4 model = translate * scale;
 
-    glUniformMatrix4fv(impl->uModel, 1, GL_FALSE, model.m);
+    impl->shader->SetModelMatrix(model.m);
 
     glBindVertexArray(impl->quadVAO);
     glDrawArrays(GL_TRIANGLES, 0, 6);
@@ -370,12 +282,11 @@ void CEngineRender::DrawRect(const SDL_FRect& rect, const Color& color)
 void CEngineRender::DrawTexture(void* texture, const SDL_FRect* srcRect, const SDL_FRect* destRect, float rotation)
 {
     GLuint texID = static_cast<GLuint>(reinterpret_cast<uintptr_t>(texture));
-    if (!texID || !destRect) return;
+    if (!texID || !destRect || !impl->shader) return;
 
-    glUseProgram(impl->shaderProgram);
-
-    glUniform4f(impl->uColor, 1.0f, 1.0f, 1.0f, 1.0f);
-    glUniform1i(impl->uUseTexture, 1);
+    impl->shader->Use();
+    impl->shader->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
+    impl->shader->SetUseTexture(true);
 
     Mat4 model;
     if (rotation != 0.0f) {
@@ -392,7 +303,7 @@ void CEngineRender::DrawTexture(void* texture, const SDL_FRect* srcRect, const S
         model = translate * scale;
     }
 
-    glUniformMatrix4fv(impl->uModel, 1, GL_FALSE, model.m);
+    impl->shader->SetModelMatrix(model.m);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texID);
