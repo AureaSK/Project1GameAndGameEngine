@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{8a0b346a-d059-4c6e-bf55-e3b545a84500}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -72,6 +75,9 @@
     <ClInclude Include="ChimasPhysicsHandles.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CShader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ChimasEngine.cpp">
@@ -125,5 +131,16 @@
     <ClCompile Include="..\External\glad\src\glad.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CShader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shaders\vertex_shader.glsl">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="shaders\fragment_shader.glsl">
+      <Filter>Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
