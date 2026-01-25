@@ -27,7 +27,7 @@ public:
 
     // Texture rendering (uses void* to hide OpenGL types)
     // textureWidth and textureHeight are needed for sprite sheet UV calculations
-    void DrawTexture(void* texture, const SDL_FRect* srcRect, const SDL_FRect* destRect, float rotation = 0.0f, int textureWidth = 0, int textureHeight = 0);
+    void DrawTexture(void* texture, const SDL_FRect* srcRect, const SDL_FRect* destRect, float rotation = 0.0f, int textureWidth = 0, int textureHeight = 0, bool ignoreScreenRotation = false);
 
     // Texture creation helper
     void* CreateTextureFromSurface(SDL_Surface* surface);

@@ -136,8 +136,8 @@ void CSpriteComponent::Render(const Vector2& position, float rotation)
     const SDL_FRect* srcPtr = useSourceRect ? &src : nullptr;
 
     // Draw with OpenGL renderer - pass texture dimensions for sprite sheet support
-    renderer->DrawTexture(texture->GetNativeTexture(), srcPtr, &dst, rotation, 
-                         texture->GetWidth(), texture->GetHeight());
+    renderer->DrawTexture(texture->GetNativeTexture(), srcPtr, &dst, rotation,
+        texture->GetWidth(), texture->GetHeight());
 
     // Note: Alpha, tint color, and flip modes are not yet implemented in OpenGL renderer
     // These can be added later by extending the shader system

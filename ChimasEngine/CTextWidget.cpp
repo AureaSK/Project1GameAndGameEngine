@@ -91,15 +91,12 @@ void CTextWidget::Tick(float deltaTime)
 void CTextWidget::Render(CEngineRender* renderer)
 {
     if (!isVisible || !font || !font->GetTexture() || text.empty())
-    {
         return;
-    }
 
     CEngineTexture* texture = font->GetTexture();
     if (!texture->GetNativeTexture())
         return;
 
-    // Get absolute position in screen space
     Vector2 renderPos = GetAbsolutePosition();
 
     // Calculate alignment offset
@@ -152,13 +149,15 @@ void CTextWidget::Render(CEngineRender* renderer)
         dstRect.w = charData->width * scale;
         dstRect.h = charData->height * scale;
 
+        // CRITICAL FIX: Pass true for ignoreScreenRotation to keep UI upright
         renderer->DrawTexture(
             texture->GetNativeTexture(),
             &srcRect,
             &dstRect,
             0.0f,
             texture->GetWidth(),
-            texture->GetHeight()
+            texture->GetHeight(),
+            true  // <-- This keeps the text upright!
         );
 
         cursorX += charData->xAdvance * scale;

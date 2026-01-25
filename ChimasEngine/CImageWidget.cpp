@@ -93,13 +93,10 @@ void CImageWidget::Tick(float deltaTime)
 void CImageWidget::Render(CEngineRender* renderer)
 {
     if (!isVisible || !texture || !texture->GetNativeTexture())
-    {
         return;
-    }
 
     Vector2 pos = GetAbsolutePosition();
 
-    // Source rectangle (what part of the texture to draw)
     SDL_FRect srcRect;
     if (useSourceRect)
     {
@@ -116,7 +113,6 @@ void CImageWidget::Render(CEngineRender* renderer)
         srcRect.h = static_cast<float>(texture->GetHeight());
     }
 
-    // Destination rectangle (where to draw on screen)
     SDL_FRect dstRect;
     dstRect.x = pos.x;
     dstRect.y = pos.y;
@@ -125,18 +121,16 @@ void CImageWidget::Render(CEngineRender* renderer)
 
     const SDL_FRect* srcPtr = useSourceRect ? &srcRect : nullptr;
 
-    // Draw the image
+    // NEW: Pass true for ignoreScreenRotation to keep UI upright
     renderer->DrawTexture(
         texture->GetNativeTexture(),
         srcPtr,
         &dstRect,
         0.0f,
         texture->GetWidth(),
-        texture->GetHeight()
+        texture->GetHeight(),
+        true  // <--- IGNORE SCREEN ROTATION FOR UI!
     );
-
-    // Note: Tint color and opacity are not yet implemented in OpenGL renderer
-    // These can be added later by extending the shader system
 
     // Render children
     for (auto child : children)

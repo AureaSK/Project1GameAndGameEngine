@@ -91,7 +91,8 @@ struct CEngineRender::Impl
     Color currentColor;
     int viewportWidth;
     int viewportHeight;
-    Mat4 projectionMatrix;
+    Mat4 projectionMatrix;        // For game objects (rotated)
+    Mat4 uiProjectionMatrix;      // For UI (no rotation)
 
     Impl() : glContext(nullptr), window(nullptr), shader(nullptr),
         quadVAO(0), quadVBO(0), currentColor{ 0, 0, 0, 255 },
@@ -147,13 +148,15 @@ bool CEngineRender::Impl::CreateQuadBuffers()
 void CEngineRender::Impl::UpdateProjectionMatrix()
 {
     if (shader) {
-        // Create the base orthographic projection
-        projectionMatrix = Mat4::Ortho(0.0f, (float)viewportWidth, (float)viewportHeight, 0.0f);
+        // UI projection matrix (no rotation - standard orthographic)
+        uiProjectionMatrix = Mat4::Ortho(0.0f, (float)viewportWidth, (float)viewportHeight, 0.0f);
 
-        // Rotate the screen to convert vertical scroller to into an horizontal scroller
+        // Game projection matrix (rotated for horizontal scrolling)
+        Mat4 baseProjection = Mat4::Ortho(0.0f, (float)viewportWidth, (float)viewportHeight, 0.0f);
         Mat4 rotation = Mat4::Rotate(-90.0f);
-        projectionMatrix = rotation * projectionMatrix;
+        projectionMatrix = rotation * baseProjection;
 
+        // Set the game projection as default
         shader->Use();
         shader->SetProjectionMatrix(projectionMatrix.m);
     }
@@ -285,7 +288,7 @@ void CEngineRender::DrawRect(const SDL_FRect& rect, const Color& color)
     glBindVertexArray(0);
 }
 
-void CEngineRender::DrawTexture(void* texture, const SDL_FRect* srcRect, const SDL_FRect* destRect, float rotation, int textureWidth, int textureHeight)
+void CEngineRender::DrawTexture(void* texture, const SDL_FRect* srcRect, const SDL_FRect* destRect, float rotation, int textureWidth, int textureHeight, bool ignoreScreenRotation)
 {
     GLuint texID = static_cast<GLuint>(reinterpret_cast<uintptr_t>(texture));
     if (!texID || !destRect || !impl->shader) return;
@@ -294,6 +297,16 @@ void CEngineRender::DrawTexture(void* texture, const SDL_FRect* srcRect, const S
     impl->shader->SetColor(1.0f, 1.0f, 1.0f, 1.0f);
     impl->shader->SetUseTexture(true);
 
+    // CRITICAL: Switch projection matrix based on ignoreScreenRotation flag
+    if (ignoreScreenRotation) {
+        // Use UI projection (no rotation)
+        impl->shader->SetProjectionMatrix(impl->uiProjectionMatrix.m);
+    }
+    else {
+        // Use game projection (rotated)
+        impl->shader->SetProjectionMatrix(impl->projectionMatrix.m);
+    }
+
     // Calculate texture coordinates for sprite sheets
     if (srcRect && textureWidth > 0 && textureHeight > 0) {
         // Convert pixel coordinates to normalized UV coordinates (0.0 to 1.0)
@@ -301,7 +314,7 @@ void CEngineRender::DrawTexture(void* texture, const SDL_FRect* srcRect, const S
         float offsetY = srcRect->y / static_cast<float>(textureHeight);
         float scaleX = srcRect->w / static_cast<float>(textureWidth);
         float scaleY = srcRect->h / static_cast<float>(textureHeight);
-        
+
         impl->shader->SetTextureCoordinates(offsetX, offsetY, scaleX, scaleY);
     }
     else {

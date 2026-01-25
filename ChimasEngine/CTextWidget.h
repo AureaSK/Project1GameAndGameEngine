@@ -10,7 +10,6 @@ private:
     CBitmapFont* font;
     std::string text;
     float scale;
-    //Color color;
     bool ownsFont;
 
     
