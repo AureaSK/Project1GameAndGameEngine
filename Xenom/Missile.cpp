@@ -42,7 +42,6 @@ void Missile::BeginPlay()
 
     physics->SetFixedRotation(true);
 
-
     physics->SetCollisionFilter(
         CollisionCategory::PLAYER_PROJECTILE,
         CollisionCategory::ENEMY | CollisionCategory::ENEMY_PROJECTILE | CollisionCategory::WALL // Only collide with enemies
