@@ -11,6 +11,9 @@
 #include "Rusher.h"
 #include "Loner.h"
 #include "ChimasLog.h"
+#include "CHUD.h"
+#include "CTextWidget.h"
+#include "CImageWidget.h"
 
 int main()
 {
@@ -26,6 +29,27 @@ int main()
     if (world)
     {
         world->CreateBoundaryWalls(Width, height);
+
+        CHUD* hud = world->GetHUD();
+
+        if (hud)
+        {
+            CTextWidget* centerText = hud->CreateWidget<CTextWidget>();
+            std::string fontPath = gameEngine.ResolveAssetPath("Xenom/ImagesForGame/font16x16.bmp");
+            centerText->LoadGridFont(fontPath, 16,16," ! #$%&'()*+,-./0123456789:;<=>? ABCDEFGHIJKLMNOPQRSTUVWXYZ[ ]^ `abcdefghijklmnopqrstuvwxyz{|}");
+
+
+            centerText->SetText("I Love Hot dog");
+
+            centerText->SetPosition(Vector2(0.0f, height / 2.0f - 20.0f));
+            centerText->SetSize(Vector2(Width, 40.0f));
+            centerText->SetHorizontalAlignment(CTextWidget::TextAlign::Center);
+
+            centerText->SetScale(3.0f);
+            centerText->SetColor(Color::White());
+
+            ChimasLog::Info("UI Text created: 'I Love Hot dog'");
+        }
 
         // Spawn the player controller
         PlayerController* playerController = world->SpawnActor<PlayerController>();

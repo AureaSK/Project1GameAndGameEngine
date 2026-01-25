@@ -8,11 +8,13 @@ class CActor;
 class CEngine;
 class CEngineRender;
 class CPhysicsComponent;
+class CHUD;
 
 class CWorld
 {
 private:
     CEngine* engine;
+    CHUD* hud;
     std::vector<CActor*> actors;
     std::vector<CActor*> pendingActors;
 
@@ -61,6 +63,8 @@ public:
     // Engine access
     CEngine* GetEngine() const { return engine; }
     void SetEngine(CEngine* engineRef) { engine = engineRef; }
+
+    CHUD* GetHUD() const { return hud; }
 
     // Physics
     void InitializePhysics(const Vector2& gravity = Vector2(0.0f, 0.0f));

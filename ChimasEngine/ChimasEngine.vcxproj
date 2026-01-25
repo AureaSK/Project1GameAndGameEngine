@@ -146,6 +146,7 @@
   <ItemGroup>
     <ClInclude Include="CActor.h" />
     <ClInclude Include="CAnimationComponent.h" />
+    <ClInclude Include="CBitmapFont.h" />
     <ClInclude Include="CController.h" />
     <ClInclude Include="CEngine.h" />
     <ClInclude Include="CEngineRender.h" />
@@ -156,10 +157,14 @@
     <ClInclude Include="ChimasUtilities.h" />
     <ClInclude Include="CEngineWindow.h" />
     <ClInclude Include="CComponent.h" />
+    <ClInclude Include="CHUD.h" />
+    <ClInclude Include="CImageWidget.h" />
     <ClInclude Include="CInputManager.h" />
     <ClInclude Include="CPawn.h" />
     <ClInclude Include="CPhysicsComponent.h" />
     <ClInclude Include="CSpriteComponent.h" />
+    <ClInclude Include="CTextWidget.h" />
+    <ClInclude Include="CWidget.h" />
     <ClInclude Include="CWorld.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="pch.h" />
@@ -175,6 +180,7 @@
     </ClCompile>
     <ClCompile Include="CActor.cpp" />
     <ClCompile Include="CAnimationComponent.cpp" />
+    <ClCompile Include="CBitmapFont.cpp" />
     <ClCompile Include="CController.cpp" />
     <ClCompile Include="CEngine.cpp" />
     <ClCompile Include="CEngineRender.cpp" />
@@ -183,11 +189,15 @@
     <ClCompile Include="ChimasUtilities.cpp" />
     <ClCompile Include="CEngineWindow.cpp" />
     <ClCompile Include="CComponent.cpp" />
+    <ClCompile Include="CHUD.cpp" />
+    <ClCompile Include="CImageWidget.cpp" />
     <ClCompile Include="CInputManager.cpp" />
     <ClCompile Include="CPawn.cpp" />
     <ClCompile Include="CPhysicsComponent.cpp" />
     <ClCompile Include="CSpriteComponent.cpp" />
     <ClCompile Include="CShader.cpp" />
+    <ClCompile Include="CTextWidget.cpp" />
+    <ClCompile Include="CWidget.cpp" />
     <ClCompile Include="CWorld.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

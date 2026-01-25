@@ -4,6 +4,7 @@
 #include "CEngineRender.h"
 #include "CSpriteComponent.h"
 #include "CPhysicsComponent.h"
+#include "CHUD.h"
 #include <box2d.h>
 #include <iostream>
 
@@ -13,13 +14,19 @@ struct CWorld::WorldImpl
 };
 
 CWorld::CWorld(CEngine* engineRef, float x, float y)
-    : engine(engineRef), impl(new WorldImpl()), pixelsPerMeter(50.0f), worldBounds(x, y), GameRunning(true)
+    : engine(engineRef), impl(new WorldImpl()), pixelsPerMeter(50.0f), worldBounds(x, y), GameRunning(true), hud(nullptr)
 {
+    hud = new CHUD(this);
     SDL_Log("CWorld created");
 }
 
 CWorld::~CWorld()
 {
+    if (hud)
+    {
+        delete hud;
+        hud = nullptr;
+    }
     for (auto actor : actors) {
         delete actor;
     }
@@ -289,6 +296,11 @@ void CWorld::Tick(float deltaTime)
     // 4. Collision callbacks (OnCollision)
     ProcessCollisions();
 
+    if (hud)
+    {
+        hud->Tick(deltaTime);
+    }
+
     // 5. Cleanup destroyed actors (OnDestroy)
     CleanupDestroyedActors();
 
@@ -310,6 +322,11 @@ void CWorld::Render(CEngineRender* renderer)
                 sprite->Render(actor->GetPosition(), actor->GetRotation());
             }
         }
+    }
+
+    if (hud)
+    {
+        hud->Render(renderer);
     }
 }
 
