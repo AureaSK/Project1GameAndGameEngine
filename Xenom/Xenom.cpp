@@ -36,17 +36,21 @@ int main()
         {
             CTextWidget* centerText = hud->CreateWidget<CTextWidget>();
             std::string fontPath = gameEngine.ResolveAssetPath("Xenom/ImagesForGame/font16x16.bmp");
-            centerText->LoadGridFont(fontPath, 16,16," ! #$%&'()*+,-./0123456789:;<=>? ABCDEFGHIJKLMNOPQRSTUVWXYZ[ ]^ `abcdefghijklmnopqrstuvwxyz{|}");
+            centerText->LoadGridFont(fontPath, 16,16," !~#$%&'()*+,-./0123456789:;<=>?ÇABCDEFGHIJKLMNOPQRSTUVWXYZ[¨]^»`abcdefghijklmnopqrstuvwxyz{|}ªº");
 
 
             centerText->SetText("I Love Hot dog");
-
+            /*
             centerText->SetPosition(Vector2(0.0f, height / 2.0f - 20.0f));
             centerText->SetSize(Vector2(Width, 40.0f));
             centerText->SetHorizontalAlignment(CTextWidget::TextAlign::Center);
 
             centerText->SetScale(3.0f);
-            centerText->SetColor(Color::White());
+            //centerText->SetColor(Color::Magenta());
+            */
+            centerText->SetPosition(Vector2(0.0f, 0.0f));
+            centerText->SetSize(Vector2(Width, 5.f));
+            centerText->SetHorizontalAlignment(CTextWidget::TextAlign::Center);
 
             ChimasLog::Info("UI Text created: 'I Love Hot dog'");
         }

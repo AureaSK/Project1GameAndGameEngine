@@ -6,7 +6,7 @@
 #include <SDL3/SDL.h>
 
 CTextWidget::CTextWidget()
-    : CWidget(), font(nullptr), text(""), scale(1.0f), color(Color::White()),
+    : CWidget(), font(nullptr), text(""), scale(1.0f), /*color(Color::White()),*/
     ownsFont(false), horizontalAlignment(TextAlign::Left), verticalAlignment(TextAlign::Left)
 {
 }

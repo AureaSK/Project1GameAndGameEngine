@@ -15,6 +15,7 @@ protected:
     bool isPendingKill;
     bool isActive;
 
+
 public:
     CActor(CWorld* world);
     virtual ~CActor();

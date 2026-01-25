@@ -10,7 +10,7 @@ private:
     CBitmapFont* font;
     std::string text;
     float scale;
-    Color color;
+    //Color color;
     bool ownsFont;
 
     
@@ -38,14 +38,14 @@ public:
     // Text properties
     void SetText(const std::string& newText);
     void SetScale(float s) { scale = s; }
-    void SetColor(const Color& c) { color = c; }
+    //void SetColor(const Color& c) { color = c; }
     void SetHorizontalAlignment(TextAlign align) { horizontalAlignment = align; }
     void SetVerticalAlignment(TextAlign align) { verticalAlignment = align; }
 
     // Getters
     const std::string& GetText() const { return text; }
     float GetScale() const { return scale; }
-    Color GetColor() const { return color; }
+    //Color GetColor() const { return color; }
 
     // Lifecycle
     virtual void Tick(float deltaTime) override;

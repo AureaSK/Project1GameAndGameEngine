@@ -23,6 +23,7 @@ private:
     void OnCollision(CActor* other);
 
 public:
+
     Loner(CWorld* world);
     virtual ~Loner();
 

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "CHUD.h"
 #include "CEngineRender.h"
+#include "CFloatingTextWidget.h"
 #include <algorithm>
 
 CHUD::CHUD(CWorld* worldRef)
@@ -42,12 +43,29 @@ void CHUD::ClearAllWidgets()
 
 void CHUD::Tick(float deltaTime)
 {
-    // Update all root widgets (they'll update their children)
+    // Update all root widgets
     for (auto widget : rootWidgets)
     {
         if (widget && widget->IsEnabled())
         {
             widget->Tick(deltaTime);
+        }
+    }
+
+    // Auto-cleanup expired floating texts
+    auto it = rootWidgets.begin();
+    while (it != rootWidgets.end())
+    {
+        CFloatingTextWidget* floatingText = dynamic_cast<CFloatingTextWidget*>(*it);
+
+        if (floatingText && floatingText->ShouldDestroy())
+        {
+            delete* it;
+            it = rootWidgets.erase(it);
+        }
+        else
+        {
+            ++it;
         }
     }
 }

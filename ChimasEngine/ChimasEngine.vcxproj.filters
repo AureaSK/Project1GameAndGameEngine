@@ -93,6 +93,9 @@
     <ClInclude Include="CImageWidget.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="CFloatingTextWidget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ChimasEngine.cpp">
@@ -162,6 +165,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="CImageWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CFloatingTextWidget.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
