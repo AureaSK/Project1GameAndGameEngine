@@ -3,12 +3,14 @@
 class HPComponent : public CComponent
 {
 private:
+	
+
+public:
 	float maxHP;
 	float currentHP;
 	float valueToChange;
 
-public:
-	HPComponent(float setMaxHp);
+	HPComponent(CActor* owner, float setMaxHp) : CComponent(owner), maxHP(setMaxHp), currentHP(setMaxHp), valueToChange(0.0f) {}
 
 	virtual ~HPComponent();
 

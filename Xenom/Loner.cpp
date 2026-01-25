@@ -4,12 +4,13 @@
 #include "CSpriteComponent.h"
 #include "CAnimationComponent.h"
 #include "CPhysicsComponent.h"
+#include "CHPComponent.h"
 #include "Missile.h"
 #include "CWorld.h"
 #include "ChimasLog.h"
 
 Loner::Loner(CWorld* world)
-    : CActor(world), sprite(nullptr), animation(nullptr), physics(nullptr),
+    : CActor(world), sprite(nullptr), animation(nullptr), physics(nullptr), health(nullptr),
     speed(200.0f), direction(1.0f), fireRate(5.0f), fireCooldown(1.0f), width(0.f){}
 
 Loner::~Loner()
@@ -51,6 +52,10 @@ void Loner::BeginPlay()
         CollisionCategory::ENEMY,
         CollisionCategory::PLAYER | CollisionCategory::PLAYER_PROJECTILE | CollisionCategory::WALL
     );
+
+    health = AddComponent<CHPComponent>();
+    health->SetMaxHP(100.0f);
+   
 
     ChimasLog::Info("Loner spawned at (%.1f, %.1f)", transform.position.x, transform.position.y);
 }
@@ -98,12 +103,23 @@ void Loner::OnCollision(CActor* other)
     if (IsPendingKill() || !other || other->IsPendingKill())
         return;
 
-    // Your collision logic here
     Missile* missile = dynamic_cast<Missile*>(other);
     if (missile)
     {
         ChimasLog::Info("Loner hit by missile!");
-        Destroy();
+
+        // Reduce health instead of immediate destruction
+        health->ChangeHP(-25.0f); // Missile deals 25 damage
+
+        ChimasLog::Info("Loner HP: %.1f / %.1f", health->GetCurrentHP(), health->GetMaxHP());
+
+        // Check if health depleted
+        if (health->GetCurrentHP() <= 0.0f)
+        {
+            ChimasLog::Info("Loner destroyed!");
+            Destroy();
+        }
+
         missile->OnCollision(this);
     }
 }

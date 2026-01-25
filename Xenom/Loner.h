@@ -4,6 +4,7 @@
 class CSpriteComponent;
 class CAnimationComponent;
 class CPhysicsComponent;
+class CHPComponent;
 
 class Loner : public CActor
 {
@@ -11,6 +12,8 @@ private:
     CSpriteComponent* sprite;
     CAnimationComponent* animation;
     CPhysicsComponent* physics;
+    CHPComponent* health;
+
     float speed;
     float direction;
     float fireRate;
