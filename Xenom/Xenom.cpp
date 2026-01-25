@@ -20,7 +20,7 @@ int main()
     CEngine gameEngine;
 
     float Width = 800;
-    float height = 600;
+    float height = 800;
 
     gameEngine.StartGame("Xenon 2000", Width, height, "Xenom/ImagesForGame/galaxy2.bmp");
 
