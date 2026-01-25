@@ -11,7 +11,7 @@
 
 Loner::Loner(CWorld* world)
     : CActor(world), sprite(nullptr), animation(nullptr), physics(nullptr), health(nullptr),
-    speed(200.0f), direction(1.0f), fireRate(5.0f), fireCooldown(1.0f), width(0.f){}
+    speed(200.0f), direction(1.0f), fireRate(5.0f), fireCooldown(1.0f), width(0.f), takenDamage(0.f){}
 
 Loner::~Loner()
 {
@@ -108,8 +108,10 @@ void Loner::OnCollision(CActor* other)
     {
         ChimasLog::Info("Loner hit by missile!");
 
+        takenDamage = missile->GetDamageValue(takenDamage);
+
         // Reduce health instead of immediate destruction
-        health->ChangeHP(-25.0f); // Missile deals 25 damage
+        health->ChangeHP(-takenDamage); // Missile deals 25 damage
 
         ChimasLog::Info("Loner HP: %.1f / %.1f", health->GetCurrentHP(), health->GetMaxHP());
 

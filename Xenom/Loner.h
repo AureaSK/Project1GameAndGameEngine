@@ -18,6 +18,7 @@ private:
     float direction;
     float fireRate;
     float fireCooldown;
+    float takenDamage;
 
     float width;
 

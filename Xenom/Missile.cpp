@@ -11,7 +11,7 @@
 
 Missile::Missile(CWorld* world)
     : CActor(world), sprite(nullptr), animation(nullptr),
-    physics(nullptr), speed(-400.0f)  // Negative = upward
+    physics(nullptr), speed(-400.0f), damage(25.f)  // Negative = upward
 {
 }
 
@@ -90,4 +90,9 @@ void Missile::OnCollision(CActor* other)
         // Destroy the missile
         Destroy();
     }
+}
+
+float Missile::GetDamageValue(float missileDamage)
+{
+    return damage;
 }

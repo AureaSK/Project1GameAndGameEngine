@@ -6,10 +6,6 @@ class CActor;
 class CFloatingTextWidget : public CTextWidget
 {
 private:
-    CBitmapFont* font;
-    std::string text;
-    float scale;
-
     CActor* targetActor;
     Vector2 offset;
 
@@ -32,5 +28,5 @@ public:
 
     // Lifecycle overrides
     virtual void Tick(float deltaTime) override;
-    virtual void Render(CEngineRender* renderer) override;  // Added: Override to ignore screen rotation
+    // Note: Render is inherited from CTextWidget (which already ignores screen rotation)
 };
