@@ -6,6 +6,7 @@
 #include "Explosion.h"
 #include "Loner.h"
 #include "Rusher.h"
+#include "Drone.h"
 #include "CWorld.h"
 #include "ChimasLog.h"
 
@@ -73,8 +74,9 @@ void Missile::OnCollision(CActor* other)
 {
     Loner* loner = dynamic_cast<Loner*>(other);
     Rusher* rusher = dynamic_cast<Rusher*>(other);
+    Drone* drone = dynamic_cast<Drone*>(other);
 
-    if (loner || rusher)
+    if (loner || rusher || drone)
     {
         ChimasLog::Info("Missile hit enemy!");
 

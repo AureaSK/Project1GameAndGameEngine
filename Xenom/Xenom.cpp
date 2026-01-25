@@ -10,6 +10,7 @@
 #include "PlayerController.h"
 #include "Rusher.h"
 #include "Loner.h"
+#include "Drone.h"
 #include "ChimasLog.h"
 #include "CHUD.h"
 #include "CTextWidget.h"
@@ -90,6 +91,20 @@ int main()
             }
         }
 
+        // Spawn Drones
+        for (int i = 0; i < 5; i++)
+        {
+            Drone* drone = world->SpawnActor<Drone>();
+            if (drone)
+            {
+				float yoffset = i * 50.f;
+                drone->SetPosition(Vector2(200.f, 100.f + yoffset));
+
+                // Each drone starts with a time offset
+                drone->SetTimeOffset(i * 0.1f); // 0.1 seconds apart
+            }
+        }
+        
         world->BeginPlay();
     }
     else
