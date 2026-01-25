@@ -147,7 +147,13 @@ bool CEngineRender::Impl::CreateQuadBuffers()
 void CEngineRender::Impl::UpdateProjectionMatrix()
 {
     if (shader) {
+        // Create the base orthographic projection
         projectionMatrix = Mat4::Ortho(0.0f, (float)viewportWidth, (float)viewportHeight, 0.0f);
+
+        // Rotate the screen to convert vertical scroller to into an horizontal scroller
+        Mat4 rotation = Mat4::Rotate(-90.0f);
+        projectionMatrix = rotation * projectionMatrix;
+
         shader->Use();
         shader->SetProjectionMatrix(projectionMatrix.m);
     }
