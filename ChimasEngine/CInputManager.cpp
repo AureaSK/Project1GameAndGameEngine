@@ -58,14 +58,14 @@ static Key MapSDLKey(SDL_Keycode key)
 {
     switch (key)
     {
-    case SDLK_LEFT: return Key::Left;
-    case SDLK_RIGHT: return Key::Right;
-    case SDLK_UP: return Key::Up;
-    case SDLK_DOWN: return Key::Down;
-    case SDLK_A: return Key::A;
-    case SDLK_D: return Key::D;
-    case SDLK_W: return Key::W;
-    case SDLK_S: return Key::S;
+    case SDLK_LEFT: return Key::Up;
+    case SDLK_RIGHT: return Key::Down;
+    case SDLK_UP: return Key::Right;
+    case SDLK_DOWN: return Key::Left;
+    case SDLK_A: return Key::W;
+    case SDLK_D: return Key::S;
+    case SDLK_W: return Key::D;
+    case SDLK_S: return Key::A;
     case SDLK_SPACE: return Key::Space;
     case SDLK_ESCAPE: return Key::Escape;
     default: return Key::Unknown;
@@ -150,18 +150,18 @@ bool CInputManager::IsKeyDown(Key key) const
 {
     if (!keyboardState) return false;
 
-    // Convert our Key -> SDL_Keycode -> scancode
+    // Convert our Key to SDL_Keycode to scancode
     SDL_Keycode sdlKey = SDLK_UNKNOWN;
     switch (key)
     {
-    case Key::Left: sdlKey = SDLK_LEFT; break;
-    case Key::Right: sdlKey = SDLK_RIGHT; break;
-    case Key::Up: sdlKey = SDLK_UP; break;
-    case Key::Down: sdlKey = SDLK_DOWN; break;
-    case Key::A: sdlKey = SDLK_A; break;
-    case Key::D: sdlKey = SDLK_D; break;
-    case Key::W: sdlKey = SDLK_W; break;
-    case Key::S: sdlKey = SDLK_S; break;
+    case Key::Down: sdlKey = SDLK_LEFT; break;
+    case Key::Up: sdlKey = SDLK_RIGHT; break;
+    case Key::Left: sdlKey = SDLK_UP; break;
+    case Key::Right: sdlKey = SDLK_DOWN; break;
+    case Key::S: sdlKey = SDLK_A; break;
+    case Key::W: sdlKey = SDLK_D; break;
+    case Key::A: sdlKey = SDLK_W; break;
+    case Key::D: sdlKey = SDLK_S; break;
     case Key::Space: sdlKey = SDLK_SPACE; break;
     case Key::Escape: sdlKey = SDLK_ESCAPE; break;
     default: sdlKey = SDLK_UNKNOWN; break;
