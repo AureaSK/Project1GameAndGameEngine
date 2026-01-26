@@ -53,7 +53,7 @@ void Drone::BeginPlay()
     // FIXED: Create as SOLID collision (sensor = false for physical collision)
     physics->CreateBoxShape(60.0f, 60.0f, false);
 
-    ChimasLog::Info("Rusher spawned at (%.1f, %.1f)", transform.position.x, transform.position.y);
+    ChimasLog::Info("Drone spawned at (%.1f, %.1f)", transform.position.x, transform.position.y);
 }
 
 void Drone::Tick(float deltaTime)

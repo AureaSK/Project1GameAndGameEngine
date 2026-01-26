@@ -11,6 +11,9 @@
 #include "Rusher.h"
 #include "Loner.h"
 #include "Drone.h"
+#include "StoneAsteroidBig.h"
+#include "StoneAsteroidMedium.h"
+#include "StoneAsteroidSmall.h"
 #include "ChimasLog.h"
 #include "CHUD.h"
 #include "CTextWidget.h"
@@ -105,6 +108,28 @@ int main()
             }
         }
         
+        // Spawn a Big Asteroid
+        StoneAsteroidBig* bigAsteroid = world->SpawnActor<StoneAsteroidBig>();
+        if (bigAsteroid)
+        {
+            bigAsteroid->SetPosition(Vector2(100.f, 100.f));
+        }
+
+        // Spawn a Medium Asteroid
+        StoneAsteroidMedium* mediumAsteroid = world->SpawnActor<StoneAsteroidMedium>();
+        if (mediumAsteroid)
+        {
+            mediumAsteroid->SetPosition(Vector2(600.f, 100.f));
+        }
+
+
+        // Spawn a Small Asteroid
+        StoneAsteroidSmall* smallAsteroid = world->SpawnActor<StoneAsteroidSmall>();
+        if (smallAsteroid)
+        {
+            smallAsteroid->SetPosition(Vector2(400.f, 100.f));
+        }
+
         world->BeginPlay();
     }
     else
