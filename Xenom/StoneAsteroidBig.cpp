@@ -1,5 +1,5 @@
+#include "StoneAsteroidBig.h"
 #include "pch.h"
-#include "Drone.h"
 #include "CSpriteComponent.h"
 #include "CAnimationComponent.h"
 #include "CPhysicsComponent.h"
@@ -9,32 +9,35 @@
 #include "CWorld.h"
 #include "ChimasLog.h"
 
-Drone::Drone(CWorld* world) : CActor(world), sprite(nullptr), animation(nullptr), physics(nullptr), speed(100.0f), direction(1.f) {}
+StoneAsteroidBig::StoneAsteroidBig(CWorld* world) : CActor(world), sprite(nullptr), animation(nullptr), physics(nullptr), speed(50.0f), direction(1.f) {}
 
-Drone::~Drone()
+StoneAsteroidBig::~StoneAsteroidBig()
 {
 
 }
 
-void Drone::BeginPlay()
+void StoneAsteroidBig::BeginPlay()
 {
     CActor::BeginPlay();
 
     // Add sprite component
     sprite = AddComponent<CSpriteComponent>();
-    if (sprite->LoadTexture("Xenom/ImagesForGame/drone.bmp"))
+    if (sprite->LoadTexture("Xenom/ImagesForGame/SAster96.bmp"))
     {
-        sprite->SetSize(64.0f, 64.0f);
+        sprite->SetSize(96.0f, 96.0f);
     }
 
     // Add animation component 
     animation = AddComponent<CAnimationComponent>();
-    animation->SetTileSize(32, 32);
+    animation->SetTileSize(96, 96);
 
-    // Rusher animation (first row)
+    // Big Asteroid animation (first row)
     animation->AddAnimation("move", {
-        {0, 0, 0.1f}, {0, 1, 0.1f}, {0, 2, 0.1f}, {0, 3, 0.1f}, {0, 4, 0.1f}, {0, 5, 0.1f}, {0, 6, 0.1f}, {0, 7, 0.1f},
-        {1, 0, 0.1f}, {1, 1, 0.1f}, {1, 2, 0.1f}, {1, 3, 0.1f}, {1, 4, 0.1f}, {1, 5, 0.1f}, {1, 6, 0.1f}, {1, 7, 0.1f},
+        {0, 0, 0.1f}, {0, 1, 0.1f}, {0, 2, 0.1f}, {0, 3, 0.1f}, {0, 4, 0.1f},
+        {1, 0, 0.1f}, {1, 1, 0.1f}, {1, 2, 0.1f}, {1, 3, 0.1f}, {1, 4, 0.1f},
+        {2, 0, 0.1f}, {2, 1, 0.1f}, {2, 2, 0.1f}, {2, 3, 0.1f}, {2, 4, 0.1f},
+        {3, 0, 0.1f}, {3, 1, 0.1f}, {3, 2, 0.1f}, {3, 3, 0.1f}, {3, 4, 0.1f},
+        {4, 0, 0.1f}, {4, 1, 0.1f}, {4, 2, 0.1f}, {4, 3, 0.1f}, {4, 4, 0.1f},
         }, true);
 
     animation->PlayAnimation("move");
@@ -51,30 +54,18 @@ void Drone::BeginPlay()
     );
 
     // FIXED: Create as SOLID collision (sensor = false for physical collision)
-    physics->CreateBoxShape(60.0f, 60.0f, false);
+    physics->CreateBoxShape(70.0f, 70.0f, false);
 
-    ChimasLog::Info("Drone spawned at (%.1f, %.1f)", transform.position.x, transform.position.y);
+    ChimasLog::Info("Big Stone Asteroid spawned at (%.1f, %.1f)", transform.position.x, transform.position.y);
 }
 
-void Drone::Tick(float deltaTime)
+void StoneAsteroidBig::Tick(float deltaTime)
 {
     CActor::Tick(deltaTime);
 
-    // Accumulate time for sine wave
-    timeAccumulator += deltaTime;
-
     if (physics)
     {
-        // Set vertical velocity only
         physics->SetVelocity(Vector2(0.0f, speed * direction));
-
-        // Set horizontal position directly using sine wave
-        float effectiveTime = timeAccumulator - timeOffset;
-        float xPos = baseX + sin(effectiveTime * sineFrequency) * sineAmplitude;
-
-        transform.position.x = xPos;
-        physics->SetPosition(transform.position);
-
     }
 
 
@@ -89,22 +80,24 @@ void Drone::Tick(float deltaTime)
     }
 }
 
-void Drone::OnCollision(CActor* other)
+void StoneAsteroidBig::OnCollision(CActor* other)
 {
     if (IsPendingKill() || !other || other->IsPendingKill()) return;
 
     Missile* missile = dynamic_cast<Missile*>(other);
     if (missile)
     {
-        ChimasLog::Info("Drone hit by missile!");
+        ChimasLog::Info("Big Asteroid hit by missile!");
         Destroy();
         missile->OnCollision(this);
+
+        //Spawn 3 Medium Asteroids
     }
 
     SpaceshipPawn* Spaceship = dynamic_cast<SpaceshipPawn*>(other);
     if (Spaceship)
     {
-        ChimasLog::Info("Drone hit spaceship!");
+        ChimasLog::Info("Big Asteroid hit spaceship!");
         Destroy();
 
         Explosion* kabum = world->SpawnActor<Explosion>();
@@ -113,7 +106,8 @@ void Drone::OnCollision(CActor* other)
             kabum->SetPosition(transform.position);
         }
 
-		// DEAL DAMAGE TO PLAYER
-    }
+        // DEAL DAMAGE TO PLAYER
 
+        //Spawn 3 Medium Asteroids
+    }
 }

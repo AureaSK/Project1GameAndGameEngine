@@ -1,5 +1,5 @@
+#include "StoneAsteroidMedium.h"
 #include "pch.h"
-#include "Drone.h"
 #include "CSpriteComponent.h"
 #include "CAnimationComponent.h"
 #include "CPhysicsComponent.h"
@@ -9,32 +9,33 @@
 #include "CWorld.h"
 #include "ChimasLog.h"
 
-Drone::Drone(CWorld* world) : CActor(world), sprite(nullptr), animation(nullptr), physics(nullptr), speed(100.0f), direction(1.f) {}
+StoneAsteroidMedium::StoneAsteroidMedium(CWorld* world) : CActor(world), sprite(nullptr), animation(nullptr), physics(nullptr), speed(62.5f), direction(1.f) {}
 
-Drone::~Drone()
+StoneAsteroidMedium::~StoneAsteroidMedium()
 {
 
 }
 
-void Drone::BeginPlay()
+void StoneAsteroidMedium::BeginPlay()
 {
     CActor::BeginPlay();
 
     // Add sprite component
     sprite = AddComponent<CSpriteComponent>();
-    if (sprite->LoadTexture("Xenom/ImagesForGame/drone.bmp"))
+    if (sprite->LoadTexture("Xenom/ImagesForGame/SAster64.bmp"))
     {
         sprite->SetSize(64.0f, 64.0f);
     }
 
     // Add animation component 
     animation = AddComponent<CAnimationComponent>();
-    animation->SetTileSize(32, 32);
+    animation->SetTileSize(64, 64);
 
-    // Rusher animation (first row)
+    // Medium Asteroid animation
     animation->AddAnimation("move", {
         {0, 0, 0.1f}, {0, 1, 0.1f}, {0, 2, 0.1f}, {0, 3, 0.1f}, {0, 4, 0.1f}, {0, 5, 0.1f}, {0, 6, 0.1f}, {0, 7, 0.1f},
         {1, 0, 0.1f}, {1, 1, 0.1f}, {1, 2, 0.1f}, {1, 3, 0.1f}, {1, 4, 0.1f}, {1, 5, 0.1f}, {1, 6, 0.1f}, {1, 7, 0.1f},
+        {2, 0, 0.1f}, {2, 1, 0.1f}, {2, 2, 0.1f}, {2, 3, 0.1f}, {2, 4, 0.1f}, {2, 5, 0.1f}, {2, 6, 0.1f}, {2, 7, 0.1f},
         }, true);
 
     animation->PlayAnimation("move");
@@ -53,28 +54,16 @@ void Drone::BeginPlay()
     // FIXED: Create as SOLID collision (sensor = false for physical collision)
     physics->CreateBoxShape(60.0f, 60.0f, false);
 
-    ChimasLog::Info("Drone spawned at (%.1f, %.1f)", transform.position.x, transform.position.y);
+    ChimasLog::Info("Medium Stone Asteroid spawned at (%.1f, %.1f)", transform.position.x, transform.position.y);
 }
 
-void Drone::Tick(float deltaTime)
+void StoneAsteroidMedium::Tick(float deltaTime)
 {
     CActor::Tick(deltaTime);
 
-    // Accumulate time for sine wave
-    timeAccumulator += deltaTime;
-
     if (physics)
     {
-        // Set vertical velocity only
         physics->SetVelocity(Vector2(0.0f, speed * direction));
-
-        // Set horizontal position directly using sine wave
-        float effectiveTime = timeAccumulator - timeOffset;
-        float xPos = baseX + sin(effectiveTime * sineFrequency) * sineAmplitude;
-
-        transform.position.x = xPos;
-        physics->SetPosition(transform.position);
-
     }
 
 
@@ -89,22 +78,24 @@ void Drone::Tick(float deltaTime)
     }
 }
 
-void Drone::OnCollision(CActor* other)
+void StoneAsteroidMedium::OnCollision(CActor* other)
 {
     if (IsPendingKill() || !other || other->IsPendingKill()) return;
 
     Missile* missile = dynamic_cast<Missile*>(other);
     if (missile)
     {
-        ChimasLog::Info("Drone hit by missile!");
+        ChimasLog::Info("Medium Asteroid hit by missile!");
         Destroy();
         missile->OnCollision(this);
+
+        //Spawn Small Asteroids
     }
 
     SpaceshipPawn* Spaceship = dynamic_cast<SpaceshipPawn*>(other);
     if (Spaceship)
     {
-        ChimasLog::Info("Drone hit spaceship!");
+        ChimasLog::Info("Medium Asteroid hit spaceship!");
         Destroy();
 
         Explosion* kabum = world->SpawnActor<Explosion>();
@@ -113,7 +104,8 @@ void Drone::OnCollision(CActor* other)
             kabum->SetPosition(transform.position);
         }
 
-		// DEAL DAMAGE TO PLAYER
-    }
+        // DEAL DAMAGE TO PLAYER
 
+        //Spawn Small Asteroids
+    }
 }
