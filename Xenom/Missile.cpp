@@ -7,6 +7,9 @@
 #include "Loner.h"
 #include "Rusher.h"
 #include "Drone.h"
+#include "StoneAsteroidBig.h"
+#include "StoneAsteroidMedium.h"
+#include "StoneAsteroidSmall.h"
 #include "CWorld.h"
 #include "ChimasLog.h"
 
@@ -74,8 +77,11 @@ void Missile::OnCollision(CActor* other)
     Loner* loner = dynamic_cast<Loner*>(other);
     Rusher* rusher = dynamic_cast<Rusher*>(other);
     Drone* drone = dynamic_cast<Drone*>(other);
+    StoneAsteroidBig* bigAsteroid = dynamic_cast<StoneAsteroidBig*>(other);
+    StoneAsteroidMedium* mediumAsteroid = dynamic_cast<StoneAsteroidMedium*>(other);
+    StoneAsteroidSmall* smallAsteroid = dynamic_cast<StoneAsteroidSmall*>(other);
 
-    if (loner || rusher || drone)
+    if (loner || rusher || drone || bigAsteroid || mediumAsteroid ||smallAsteroid)
     {
         ChimasLog::Info("Missile hit enemy!");
 
