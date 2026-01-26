@@ -62,7 +62,7 @@ void Drone::BeginPlay()
     health = AddComponent<CHPComponent>();
     health->SetMaxHP(50.f);
 
-    ChimasLog::Info("Rusher spawned at (%.1f, %.1f)", transform.position.x, transform.position.y);
+    ChimasLog::Info("Drone spawned at (%.1f, %.1f)", transform.position.x, transform.position.y);
 }
 
 void Drone::Tick(float deltaTime)
@@ -106,13 +106,6 @@ void Drone::OnCollision(CActor* other)
     if (missile)
     {
         ChimasLog::Info("Loner hit by missile!");
-
-        // Notify game manager
-        if (gameManager)
-        {
-            gameManager->AddScore(scoreValue);
-            gameManager->OnEnemyKilled();
-        }
 
         takenDamage = missile->GetDamageValue(takenDamage);
 

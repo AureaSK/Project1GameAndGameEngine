@@ -16,7 +16,7 @@
 
 Rusher::Rusher(CWorld* world)
     : CActor(world), sprite(nullptr), animation(nullptr), physics(nullptr),
-    health(nullptr), gameManager(nullptr), speed(100.0f), direction(1.f), damage(25.f), takenDamage(0.f), scoreValue(75) {
+    health(nullptr), gameManager(nullptr), speed(250.0f), direction(1.f), damage(25.f), takenDamage(0.f), scoreValue(75) {
 }
 
 
@@ -61,14 +61,14 @@ void Rusher::BeginPlay()
     // FIXED: Set collision filter BEFORE creating shape
     physics->SetCollisionFilter(
         CollisionCategory::ENEMY,
-        CollisionCategory::PLAYER | CollisionCategory::PLAYER_PROJECTILE | CollisionCategory::WALL
+        CollisionCategory::PLAYER | CollisionCategory::PLAYER_PROJECTILE 
     );
 
     // FIXED: Create as SOLID collision (sensor = false for physical collision)
     physics->CreateBoxShape(30.0f, 30.0f, false);
 
     health = AddComponent<CHPComponent>();
-    health->SetMaxHP(100.0f);
+    health->SetMaxHP(50.0f);
 
     ChimasLog::Info("Rusher spawned at (%.1f, %.1f)", transform.position.x, transform.position.y);
 }
@@ -84,14 +84,15 @@ void Rusher::Tick(float deltaTime)
 
 
     // Destroy if off screen
-    if (transform.position.y > (world->GetWorldBounds().y - 50))
+    if (transform.position.y > (world->GetWorldBounds().y + 150))
     {
         direction = -1.f;
     }
-    if (transform.position.y < (0 + 50))
+    if (transform.position.y < (0 - 150))
     {
         direction = 1.f;
     }
+    
 }
 
 void Rusher::OnCollision(CActor* other)

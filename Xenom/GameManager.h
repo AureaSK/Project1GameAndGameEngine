@@ -23,6 +23,9 @@ private:
     void SpawnLoners(int count);
     void SpawnRushers(int count);
     void SpawnDrones(int count);
+    void SpawnBigAsteroid(int count);
+    void SpawnMediumAsteroid(int count);
+    void SpawnSmallAsteroid(int count);
 
 public:
     GameManager(CWorld* world);

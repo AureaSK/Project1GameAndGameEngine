@@ -7,8 +7,12 @@
 #include "Loner.h"
 #include "Rusher.h"
 #include "Drone.h"
+#include "StoneAsteroidBig.h"
+#include "StoneAsteroidMedium.h"
+#include "StoneAsteroidSmall.h"
 #include "ChimasLog.h"
 #include <string>
+#include <random>
 
 GameManager::GameManager(CWorld* world)
     : CActor(world), playerScore(0), currentWave(0), enemiesAlive(0),
@@ -42,7 +46,7 @@ void GameManager::BeginPlay()
         // Create wave display (top-right)
         waveText = hud->CreateWidget<CTextWidget>();
         waveText->LoadGridFont(fontPath, 16, 16, " !~#$%&'()*+,-./0123456789:;<=>?ÇABCDEFGHIJKLMNOPQRSTUVWXYZ[¨]^»`abcdefghijklmnopqrstuvwxyz{|}ªº");
-        waveText->SetPosition(Vector2(500.0f, 10.0f));
+        waveText->SetPosition(Vector2(475.0f, 10.0f));
         waveText->SetSize(Vector2(300.0f, 30.0f));
         waveText->SetScale(1.0f);
         waveText->SetHorizontalAlignment(CTextWidget::TextAlign::Right);
@@ -50,7 +54,7 @@ void GameManager::BeginPlay()
         // CREATE HEALTH DISPLAY (BOTTOM-LEFT) - ADD THIS:
         healthText = hud->CreateWidget<CTextWidget>();
         healthText->LoadGridFont(fontPath, 16, 16, " !~#$%&'()*+,-./0123456789:;<=>?ÇABCDEFGHIJKLMNOPQRSTUVWXYZ[¨]^»`abcdefghijklmnopqrstuvwxyz{|}ªº");
-        healthText->SetPosition(Vector2(10.0f, 700.f)); // Bottom-left (adjust Y based on your screen height)
+        healthText->SetPosition(Vector2(10.0f, 775.f)); // Bottom-left (adjust Y based on your screen height)
         healthText->SetSize(Vector2(300.0f, 30.0f));
         healthText->SetScale(1.0f);
         healthText->SetHorizontalAlignment(CTextWidget::TextAlign::Left);
@@ -92,12 +96,18 @@ void GameManager::SpawnWave()
     int lonersToSpawn = 2 + (currentWave / 2);
     int rushersToSpawn = 1 + (currentWave / 3);
     int dronesToSpawn = (currentWave > 2) ? (currentWave / 2) : 0;
+	int bigAsteroidsToSpawn = (currentWave >= 5) ? 1 : 0;
+	int mediumAsteroidsToSpawn = (currentWave >= 3) ? 1 : 0;
+	int smallAsteroidsToSpawn = currentWave;
 
     SpawnLoners(lonersToSpawn);
     SpawnRushers(rushersToSpawn);
     SpawnDrones(dronesToSpawn);
+	SpawnBigAsteroid(bigAsteroidsToSpawn);
+	SpawnMediumAsteroid(mediumAsteroidsToSpawn);    
+	SpawnSmallAsteroid(smallAsteroidsToSpawn);
 
-    enemiesAlive = lonersToSpawn + rushersToSpawn + dronesToSpawn;
+    enemiesAlive = lonersToSpawn + rushersToSpawn + (dronesToSpawn*3);
 
     UpdateWaveDisplay();
 
@@ -131,9 +141,12 @@ void GameManager::SpawnRushers(int count)
         Rusher* rusher = world->SpawnActor<Rusher>();
         if (rusher)
         {
-            float xPos = 200.0f + (i * 200.0f);
+            std::random_device rd;                  // seed
+            std::mt19937 gen(rd());                 // Mersenne Twister engine
+            std::uniform_int_distribution<> dist(100, 700);
+
             float yPos = 100.0f;
-            rusher->SetPosition(Vector2(xPos, yPos));
+            rusher->SetPosition(Vector2(dist(gen), yPos));
             rusher->SetGameManager(this); // Set reference to game manager
         }
     }
@@ -141,16 +154,88 @@ void GameManager::SpawnRushers(int count)
 
 void GameManager::SpawnDrones(int count)
 {
+    
+    for (int a = 0; a < count; a++)
+    {
+        std::random_device rd;                  // seed
+        std::mt19937 gen(rd());                 // Mersenne Twister engine
+        std::uniform_int_distribution<> dist(200, 600);
+
+        float randomX = dist(gen);
+
+        for (int i = 0; i < 3; i++)
+        {
+            Drone* drone = world->SpawnActor<Drone>();
+            if (drone)
+            {
+                float yOffset = i * 50.0f;
+                drone->SetBaseX(randomX); // Center X for sine wave
+                drone->SetPosition(Vector2(0.0f, 100.0f + yOffset));
+                drone->SetTimeOffset(i * 0.1f);
+                drone->SetGameManager(this); // Set reference to game manager
+            }
+        }
+    }
+    
+}
+
+void GameManager::SpawnBigAsteroid(int count)
+{
     for (int i = 0; i < count; i++)
     {
-        Drone* drone = world->SpawnActor<Drone>();
-        if (drone)
+        StoneAsteroidBig* bigAsteroid = world->SpawnActor<StoneAsteroidBig>();
+
+        if (bigAsteroid)
         {
-            float yOffset = i * 50.0f;
-            drone->SetPosition(Vector2(200.0f, 100.0f + yOffset));
-            drone->SetTimeOffset(i * 0.1f);
-            drone->SetGameManager(this); // Set reference to game manager
+            std::random_device rd;                  // seed
+            std::mt19937 gen(rd());                 // Mersenne Twister engine
+            std::uniform_int_distribution<> dist(200, 600);
+
+			bigAsteroid->SetPosition(Vector2(dist(gen), 100.0f));
+			bigAsteroid->SetGameManager(this); // Set reference to game manager
+
         }
+
+    }
+}
+
+void GameManager::SpawnMediumAsteroid(int count)
+{
+    for (int i = 0; i < count; i++)
+    {
+        StoneAsteroidMedium* mediumAsteroid = world->SpawnActor<StoneAsteroidMedium>();
+
+        if (mediumAsteroid)
+        {
+            std::random_device rd;                  // seed
+            std::mt19937 gen(rd());                 // Mersenne Twister engine
+            std::uniform_int_distribution<> dist(150, 650);
+
+            mediumAsteroid->SetPosition(Vector2(dist(gen), 100.0f));
+            mediumAsteroid->SetGameManager(this); // Set reference to game manager
+
+        }
+
+    }
+}
+
+void GameManager::SpawnSmallAsteroid(int count)
+{
+    for (int i = 0; i < count; i++)
+    {
+        StoneAsteroidSmall* smallAsteroid = world->SpawnActor<StoneAsteroidSmall>();
+
+        if (smallAsteroid)
+        {
+            std::random_device rd;                  // seed
+            std::mt19937 gen(rd());                 // Mersenne Twister engine
+            std::uniform_int_distribution<> dist(100, 700);
+            
+            smallAsteroid->SetPosition(Vector2(dist(gen), 100.0f));
+            smallAsteroid->SetGameManager(this); // Set reference to game manager
+
+        }
+
     }
 }
 
@@ -164,7 +249,7 @@ void GameManager::AddScore(int points)
 void GameManager::OnEnemyKilled()
 {
     enemiesAlive--;
-    ChimasLog::Info("Enemy killed! Remaining: %d", enemiesAlive);
+    ChimasLog::Info("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEnemy killed! Remaining: %d", enemiesAlive);
 
     if (enemiesAlive <= 0)
     {

@@ -5,8 +5,7 @@ class CSpriteComponent;
 class CAnimationComponent;
 class CPhysicsComponent;
 class CHPComponent;
-
-
+class GameManager;
 
 class StoneAsteroidBig : public CActor
 {
@@ -15,6 +14,7 @@ private:
 	CAnimationComponent* animation;
 	CPhysicsComponent* physics;
 	CHPComponent* health;
+	GameManager* gameManager;
 	float speed;
 	float direction;
 
@@ -27,5 +27,6 @@ public:
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float deltaTime) override;
+	void SetGameManager(GameManager* manager) { gameManager = manager; }
 };
 
