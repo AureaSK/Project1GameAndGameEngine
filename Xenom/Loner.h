@@ -21,6 +21,7 @@ private:
     float takenDamage;
 
     float width;
+    float damage;
 
     void FireProjectile();
 
@@ -34,6 +35,9 @@ public:
     virtual void BeginPlay() override;
     virtual void Tick(float deltaTime) override;
 
+    float GetDamageValue(float enemyDamage);
+
     void SetDirection(float dir) { direction = dir; }
+    
 };
 

@@ -12,6 +12,7 @@ private:
     CAnimationComponent* animation;
     CPhysicsComponent* physics;
     float speed;
+    float damage;
     
 
 public:
@@ -21,4 +22,6 @@ public:
     virtual void BeginPlay() override;
     virtual void Tick(float deltaTime) override;
     virtual void OnCollision(CActor* other) override;
+
+    float GetDamageValue(float projectileDamage);
 };

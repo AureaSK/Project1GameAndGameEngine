@@ -16,7 +16,7 @@
 
 Loner::Loner(CWorld* world)
     : CActor(world), sprite(nullptr), animation(nullptr), physics(nullptr), health(nullptr),
-    speed(200.0f), direction(1.0f), fireRate(5.0f), fireCooldown(1.0f), width(0.f), takenDamage(0.f){}
+    speed(200.0f), direction(1.0f), fireRate(5.0f), fireCooldown(1.0f), width(0.f), damage(50.f), takenDamage(0.f) { }
 
 Loner::~Loner()
 {
@@ -181,4 +181,8 @@ void Loner::OnCollision(CActor* other)
 
         // DEAL DAMAGE TO PLAYER
     }
+}
+float Loner::GetDamageValue(float enemyDamage)
+{
+    return damage;
 }

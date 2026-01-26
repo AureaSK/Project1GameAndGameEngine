@@ -18,6 +18,7 @@ private:
     float moveSpeed;
     float fireRate;
     float fireCooldown;
+    float takenDamage;
 
 public:
     SpaceshipPawn(CWorld* world);

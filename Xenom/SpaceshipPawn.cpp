@@ -151,13 +151,27 @@ void SpaceshipPawn::OnCollision(CActor* other)
     EnemyProjectile* eProject = dynamic_cast<EnemyProjectile*>(other);
     Loner* loner = dynamic_cast<Loner*>(other);
 
-    if (loner || eProject)
+    if (loner)
     {
-        ChimasLog::Info("Player hit enemy - GAME OVER!");
+        ChimasLog::Info("Player hit enemy");
         other->OnCollision(this);
 
-        //Destroy();
+        takenDamage = loner->GetDamageValue(takenDamage);
 
+        health->ChangeHP(-takenDamage);
 		//Deal damage instead of immediate destruction
+    }
+    else if (eProject)
+    {
+        ChimasLog::Info("Player hit enemy projectile");
+        other->OnCollision(this);
+
+        takenDamage = eProject->GetDamageValue(takenDamage);
+
+        health->ChangeHP(-takenDamage);
+    }
+    if (health->GetCurrentHP() <= 0.0f)
+    {
+        Destroy();
     }
 }
