@@ -5,7 +5,7 @@
 class CSpriteComponent;
 class CAnimationComponent;
 class CPhysicsComponent;
-class HPComponent;
+class CHPComponent;
 
 class SpaceshipPawn : public CPawn
 {
@@ -13,6 +13,7 @@ private:
     CSpriteComponent* sprite;
     CAnimationComponent* animation;
     CPhysicsComponent* physics;
+    CHPComponent* health;
 
     float moveSpeed;
     float fireRate;
