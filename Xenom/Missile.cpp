@@ -81,7 +81,7 @@ void Missile::OnCollision(CActor* other)
     StoneAsteroidMedium* mediumAsteroid = dynamic_cast<StoneAsteroidMedium*>(other);
     StoneAsteroidSmall* smallAsteroid = dynamic_cast<StoneAsteroidSmall*>(other);
 
-    if (loner || rusher || drone || bigAsteroid || mediumAsteroid || smallAsteroid)
+    if (loner || rusher || drone || bigAsteroid || mediumAsteroid ||smallAsteroid)
     {
         ChimasLog::Info("Missile hit enemy!");
 
