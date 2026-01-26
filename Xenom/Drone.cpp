@@ -12,8 +12,10 @@
 #include "CHUD.h"
 #include "CFloatingTextWidget.h"
 #include "CEngine.h"
+#include "GameManager.h"
 
-Drone::Drone(CWorld* world) : CActor(world), sprite(nullptr), animation(nullptr), physics(nullptr), health(nullptr), speed(100.0f), direction(1.f), damage(25.f) {}
+Drone::Drone(CWorld* world) : CActor(world), sprite(nullptr), animation(nullptr),
+physics(nullptr), health(nullptr), gameManager(nullptr), speed(100.0f), direction(1.f), damage(25.f), scoreValue(50) {}
 
 Drone::~Drone()
 {
@@ -105,6 +107,13 @@ void Drone::OnCollision(CActor* other)
     {
         ChimasLog::Info("Loner hit by missile!");
 
+        // Notify game manager
+        if (gameManager)
+        {
+            gameManager->AddScore(scoreValue);
+            gameManager->OnEnemyKilled();
+        }
+
         takenDamage = missile->GetDamageValue(takenDamage);
 
         // Reduce health instead of immediate destruction
@@ -115,7 +124,13 @@ void Drone::OnCollision(CActor* other)
         // Check if health depleted
         if (health->GetCurrentHP() <= 0.0f)
         {
-            ChimasLog::Info("Loner destroyed!");
+            ChimasLog::Info("Drone destroyed!");
+
+            if (gameManager)
+            {
+                gameManager->AddScore(scoreValue);
+                gameManager->OnEnemyKilled();
+            }
 
             // Create floating text on death
             CHUD* hud = world->GetHUD();
@@ -138,16 +153,13 @@ void Drone::OnCollision(CActor* other)
                 screenPos.x = screenBounds.x - gamePos.y;  // Game Y becomes screen X
                 screenPos.y = gamePos.x;  // Game X becomes inverted screen Y
 
-                // Configure the floating text
-                floatingText->SetText("DESTROYED!");
-                floatingText->SetTarget(nullptr);  // Don't follow the actor since it's about to be destroyed
-                floatingText->SetLifetime(2.0f);
-                floatingText->SetFloatSpeed(10.0f);
-                floatingText->SetScale(.5f);
-
-                // Set position and size
+                floatingText->SetText("+" + std::to_string(scoreValue));
+                floatingText->SetTarget(nullptr);
+                floatingText->SetLifetime(1.5f);
+                floatingText->SetFloatSpeed(30.0f);
+                floatingText->SetScale(1.0f);
                 floatingText->SetPosition(screenPos);
-                floatingText->SetSize(Vector2(200.0f, 50.0f));
+                floatingText->SetSize(Vector2(100.0f, 30.0f));
                 floatingText->SetHorizontalAlignment(CFloatingTextWidget::TextAlign::Center);
 
                 ChimasLog::Info("Floating text created for destroyed Loner");
@@ -162,16 +174,21 @@ void Drone::OnCollision(CActor* other)
     SpaceshipPawn* Spaceship = dynamic_cast<SpaceshipPawn*>(other);
     if (Spaceship)
     {
-        ChimasLog::Info("Rusher hit spaceship!");
-        Destroy();
+        ChimasLog::Info("Drone hit spaceship!");
 
-        Explosion* kabum = world->SpawnActor<Explosion>();
-        if (kabum)
+        Explosion* explosion = world->SpawnActor<Explosion>();
+        if (explosion)
         {
-            kabum->SetPosition(transform.position);
+            explosion->SetPosition(transform.position);
         }
 
-        // DEAL DAMAGE TO PLAYER
+        // Notify game manager
+        if (gameManager)
+        {
+            gameManager->OnEnemyKilled();
+        }
+
+        Destroy();
     }
 
 }

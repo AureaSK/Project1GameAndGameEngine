@@ -1,0 +1,50 @@
+#pragma once
+#include "CActor.h"
+#include <vector>
+
+class CTextWidget;
+
+class GameManager : public CActor
+{
+private:
+    int playerScore;
+    int currentWave;
+    int enemiesAlive;
+    int enemiesPerWave;
+    float waveSpawnDelay;
+    float waveTimer;
+    bool isGameOver;
+
+    CTextWidget* scoreText;
+    CTextWidget* waveText;
+
+    void SpawnWave();
+    void SpawnLoners(int count);
+    void SpawnRushers(int count);
+    void SpawnDrones(int count);
+
+public:
+    GameManager(CWorld* world);
+    virtual ~GameManager();
+
+    virtual void BeginPlay() override;
+    virtual void Tick(float deltaTime) override;
+
+    // Score management
+    void AddScore(int points);
+    int GetScore() const { return playerScore; }
+
+    // Enemy tracking
+    void OnEnemyKilled();
+    void OnPlayerDeath();
+
+    // Wave management
+    int GetCurrentWave() const { return currentWave; }
+    bool IsGameOver() const { return isGameOver; }
+
+    // UI updates
+    void UpdateScoreDisplay();
+    void UpdateWaveDisplay();
+    void ShowGameOverScreen();
+};
+

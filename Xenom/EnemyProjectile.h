@@ -4,6 +4,7 @@
 class CSpriteComponent;
 class CAnimationComponent;
 class CPhysicsComponent;
+class GameManager;
 
 class EnemyProjectile : public CActor
 {
@@ -11,6 +12,7 @@ private:
     CSpriteComponent* sprite;
     CAnimationComponent* animation;
     CPhysicsComponent* physics;
+    GameManager* manager;
     float speed;
     float damage;
     

@@ -11,10 +11,11 @@
 #include "Loner.h"
 #include "Rusher.h"
 #include "Drone.h"
+#include "GameManager.h"
 #include "ChimasLog.h"
 
 SpaceshipPawn::SpaceshipPawn(CWorld* world)
-    : CPawn(world), sprite(nullptr), animation(nullptr), health(nullptr), moveSpeed(300.0f), fireRate(0.2f), fireCooldown(0.0f) { }
+    : CPawn(world), sprite(nullptr), animation(nullptr), health(nullptr), gameManager(nullptr), moveSpeed(300.0f), fireRate(0.2f), fireCooldown(0.0f) { }
 
 SpaceshipPawn::~SpaceshipPawn()
 {
@@ -136,6 +137,12 @@ void SpaceshipPawn::Destroy()
 {
     isPendingKill = true;
     ChimasLog::Info("GAME OVER - Player destroyed!");
+
+    // Notify game manager
+    if (gameManager)
+    {
+        gameManager->OnPlayerDeath();
+    }
 
     // Unpossess before destroying
     if (controller)
