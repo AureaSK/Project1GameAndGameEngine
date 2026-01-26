@@ -28,6 +28,11 @@ void SpaceshipPawn::BeginPlay()
     health = AddComponent<CHPComponent>();
     health->SetMaxHP(100.0f);
 
+    if (gameManager)
+    {
+        gameManager->UpdateHealthDisplay(health->GetCurrentHP(), health->GetMaxHP());
+    }
+
     // Add sprite component
     sprite = AddComponent<CSpriteComponent>();
     if (sprite->LoadTexture("Xenom/ImagesForGame/Ship1.bmp"))
@@ -200,6 +205,12 @@ void SpaceshipPawn::OnCollision(CActor* other)
 
         health->ChangeHP(-takenDamage);
     }
+
+    if (gameManager)
+    {
+        gameManager->UpdateHealthDisplay(health->GetCurrentHP(), health->GetMaxHP());
+    }
+
     if (health->GetCurrentHP() <= 0.0f)
     {
         Destroy();

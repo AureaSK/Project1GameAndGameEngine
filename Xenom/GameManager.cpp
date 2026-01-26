@@ -47,6 +47,14 @@ void GameManager::BeginPlay()
         waveText->SetScale(1.0f);
         waveText->SetHorizontalAlignment(CTextWidget::TextAlign::Right);
 
+        // CREATE HEALTH DISPLAY (BOTTOM-LEFT) - ADD THIS:
+        healthText = hud->CreateWidget<CTextWidget>();
+        healthText->LoadGridFont(fontPath, 16, 16, " !~#$%&'()*+,-./0123456789:;<=>?ÇABCDEFGHIJKLMNOPQRSTUVWXYZ[¨]^»`abcdefghijklmnopqrstuvwxyz{|}ªº");
+        healthText->SetPosition(Vector2(10.0f, 700.f)); // Bottom-left (adjust Y based on your screen height)
+        healthText->SetSize(Vector2(300.0f, 30.0f));
+        healthText->SetScale(1.0f);
+        healthText->SetHorizontalAlignment(CTextWidget::TextAlign::Left);
+
         UpdateScoreDisplay();
         UpdateWaveDisplay();
     }
@@ -184,6 +192,16 @@ void GameManager::UpdateWaveDisplay()
     if (waveText)
     {
         waveText->SetText("WAVE: " + std::to_string(currentWave));
+    }
+}
+
+void GameManager::UpdateHealthDisplay(float currentHP, float maxHP)
+{
+    if (healthText)
+    {
+        int hpInt = static_cast<int>(currentHP);
+        int maxHPInt = static_cast<int>(maxHP);
+        healthText->SetText("HP: " + std::to_string(hpInt) + " / " + std::to_string(maxHPInt));
     }
 }
 

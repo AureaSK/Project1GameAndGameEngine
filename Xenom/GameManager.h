@@ -17,6 +17,7 @@ private:
 
     CTextWidget* scoreText;
     CTextWidget* waveText;
+    CTextWidget* healthText;
 
     void SpawnWave();
     void SpawnLoners(int count);
@@ -33,6 +34,8 @@ public:
     // Score management
     void AddScore(int points);
     int GetScore() const { return playerScore; }
+
+    void UpdateHealthDisplay(float currentHP, float maxHP);
 
     // Enemy tracking
     void OnEnemyKilled();
