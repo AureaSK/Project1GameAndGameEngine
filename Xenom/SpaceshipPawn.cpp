@@ -5,6 +5,7 @@
 #include "CSpriteComponent.h"
 #include "CAnimationComponent.h"
 #include "CPhysicsComponent.h"
+#include "CHPComponent.h"
 #include "CWorld.h"
 #include "EnemyProjectile.h"
 #include "Loner.h"
@@ -12,7 +13,7 @@
 #include "ChimasLog.h"
 
 SpaceshipPawn::SpaceshipPawn(CWorld* world)
-    : CPawn(world), sprite(nullptr), animation(nullptr), moveSpeed(300.0f), fireRate(0.2f), fireCooldown(0.0f){}
+    : CPawn(world), sprite(nullptr), animation(nullptr), health(nullptr), moveSpeed(300.0f), fireRate(0.2f), fireCooldown(0.0f) { }
 
 SpaceshipPawn::~SpaceshipPawn()
 {
@@ -21,6 +22,9 @@ SpaceshipPawn::~SpaceshipPawn()
 void SpaceshipPawn::BeginPlay()
 {
     CPawn::BeginPlay();
+
+    health = AddComponent<CHPComponent>();
+    health->SetMaxHP(100.0f);
 
     // Add sprite component
     sprite = AddComponent<CSpriteComponent>();
