@@ -3,7 +3,8 @@
 #include "CSpriteComponent.h"
 #include "CAnimationComponent.h"
 #include "CPhysicsComponent.h"
-#include "Spaceship.h"
+#include "Explosion.h"
+#include "SpaceshipPawn.h"
 #include "CWorld.h"
 #include "ChimasLog.h"
 
@@ -69,16 +70,18 @@ void EnemyProjectile::Tick(float deltaTime)
 void EnemyProjectile::OnCollision(CActor* other)
 {
     // Check if we hit the player
-    Spaceship* spaceship = dynamic_cast<Spaceship*>(other);
+    SpaceshipPawn* spaceship = dynamic_cast<SpaceshipPawn*>(other);
 
     if (spaceship)
     {
         ChimasLog::Info("Enemy projectile hit player!");
 
-        // Destroy the player (game over)
-        //spaceship->OnCollision(this);
+        Explosion* kabum = world->SpawnActor<Explosion>();
+        if (kabum)
+        {
+            kabum->SetPosition(transform.position);
+        }
 
-        // Destroy the projectile
         Destroy();
     }
     else

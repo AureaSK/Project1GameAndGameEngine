@@ -189,7 +189,7 @@ void SpaceshipPawn::OnCollision(CActor* other)
     }
     else if (rusher)
     {
-        ChimasLog::Info("Player hit enemy projectile");
+        ChimasLog::Info("Player hit enemy");
         other->OnCollision(this);
 
         takenDamage = rusher->GetDamageValue(takenDamage);
@@ -198,13 +198,14 @@ void SpaceshipPawn::OnCollision(CActor* other)
     }
     else if (drone)
     {
-        ChimasLog::Info("Player hit enemy projectile");
+        ChimasLog::Info("Player hit enemy");
         other->OnCollision(this);
 
         takenDamage = drone->GetDamageValue(takenDamage);
 
         health->ChangeHP(-takenDamage);
     }
+
 
     if (gameManager)
     {

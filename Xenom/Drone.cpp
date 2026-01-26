@@ -162,7 +162,7 @@ void Drone::OnCollision(CActor* other)
                 floatingText->SetSize(Vector2(100.0f, 30.0f));
                 floatingText->SetHorizontalAlignment(CFloatingTextWidget::TextAlign::Center);
 
-                ChimasLog::Info("Floating text created for destroyed Loner");
+                ChimasLog::Info("Floating text created for destroyed Drone");
             }
 
             Destroy();
