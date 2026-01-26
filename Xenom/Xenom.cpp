@@ -17,6 +17,7 @@
 #include "ChimasLog.h"
 #include "CHUD.h"
 #include "CTextWidget.h"
+#include "GameManager.h"
 #include "CImageWidget.h"
 
 int main()
