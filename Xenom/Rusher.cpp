@@ -55,7 +55,7 @@ void Rusher::BeginPlay()
     );
 
     // FIXED: Create as SOLID collision (sensor = false for physical collision)
-    physics->CreateBoxShape(60.0f, 60.0f, false);
+    physics->CreateBoxShape(30.0f, 30.0f, false);
 
     ChimasLog::Info("Rusher spawned at (%.1f, %.1f)", transform.position.x, transform.position.y);
 }

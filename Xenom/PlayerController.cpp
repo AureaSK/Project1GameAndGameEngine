@@ -72,7 +72,7 @@ void PlayerController::Tick(float deltaTime)
     spaceship->MoveInDirection(moveDirection);
 
     // Handle fire input
-    if (input->IsKeyPressed(Key::Space) || input->IsButtonPressed(GamepadButton::South))
+    if (input->IsKeyDown(Key::Space) || input->IsButtonDown(GamepadButton::South))
     {
         spaceship->FireWeapon();
     }
