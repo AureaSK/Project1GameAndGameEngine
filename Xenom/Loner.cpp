@@ -10,6 +10,9 @@
 #include "Explosion.h"
 #include "CWorld.h"
 #include "ChimasLog.h"
+#include "CHUD.h"
+#include "CFloatingTextWidget.h"
+#include "CEngine.h"
 
 Loner::Loner(CWorld* world)
     : CActor(world), sprite(nullptr), animation(nullptr), physics(nullptr), health(nullptr),
@@ -121,6 +124,43 @@ void Loner::OnCollision(CActor* other)
         if (health->GetCurrentHP() <= 0.0f)
         {
             ChimasLog::Info("Loner destroyed!");
+
+            // Create floating text on death
+            CHUD* hud = world->GetHUD();
+            if (hud)
+            {
+                CFloatingTextWidget* floatingText = hud->CreateWidget<CFloatingTextWidget>();
+
+                // Load font
+                std::string fontPath = world->GetEngine()->ResolveAssetPath("Xenom/ImagesForGame/font16x16.bmp");
+                floatingText->LoadGridFont(fontPath, 16, 16, " !~#$%&'()*+,-./0123456789:;<=>?ÇABCDEFGHIJKLMNOPQRSTUVWXYZ[¨]^»`abcdefghijklmnopqrstuvwxyz{|}ªº");
+
+                // Convert game world position to screen position
+                // Game is rotated -90 degrees, so we need to transform:
+                // Original: (gameX, gameY) -> Screen: (gameY, screenHeight - gameX)
+                Vector2 gamePos = transform.position;
+                Vector2 screenBounds = world->GetWorldBounds();
+
+                // Transform rotated game coordinates to screen coordinates
+                Vector2 screenPos;
+                screenPos.x = screenBounds.x - gamePos.y;  // Game Y becomes screen X
+                screenPos.y = gamePos.x;  // Game X becomes inverted screen Y
+
+                // Configure the floating text
+                floatingText->SetText("DESTROYED!");
+                floatingText->SetTarget(nullptr);  // Don't follow the actor since it's about to be destroyed
+                floatingText->SetLifetime(2.0f);
+                floatingText->SetFloatSpeed(10.0f);
+                floatingText->SetScale(.5f);
+
+                // Set position and size
+                floatingText->SetPosition(screenPos);
+                floatingText->SetSize(Vector2(200.0f, 50.0f));
+                floatingText->SetHorizontalAlignment(CFloatingTextWidget::TextAlign::Center);
+
+                ChimasLog::Info("Floating text created for destroyed Loner");
+            }
+
             Destroy();
         }
 
