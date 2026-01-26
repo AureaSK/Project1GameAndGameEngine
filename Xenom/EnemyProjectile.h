@@ -4,6 +4,7 @@
 class CSpriteComponent;
 class CAnimationComponent;
 class CPhysicsComponent;
+class GameManager;
 
 class EnemyProjectile : public CActor
 {
@@ -11,7 +12,9 @@ private:
     CSpriteComponent* sprite;
     CAnimationComponent* animation;
     CPhysicsComponent* physics;
+    GameManager* manager;
     float speed;
+    float damage;
     
 
 public:
@@ -21,4 +24,6 @@ public:
     virtual void BeginPlay() override;
     virtual void Tick(float deltaTime) override;
     virtual void OnCollision(CActor* other) override;
+
+    float GetDamageValue(float projectileDamage);
 };

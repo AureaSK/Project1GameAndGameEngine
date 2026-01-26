@@ -3,13 +3,19 @@
 #include "CSpriteComponent.h"
 #include "CAnimationComponent.h"
 #include "CPhysicsComponent.h"
+#include "CHPComponent.h"
 #include "Missile.h"
 #include "SpaceshipPawn.h"
 #include "Explosion.h"
 #include "CWorld.h"
 #include "ChimasLog.h"
+#include "CHUD.h"
+#include "CFloatingTextWidget.h"
+#include "CEngine.h"
+#include "GameManager.h"
 
-Drone::Drone(CWorld* world) : CActor(world), sprite(nullptr), animation(nullptr), physics(nullptr), speed(100.0f), direction(1.f) {}
+Drone::Drone(CWorld* world) : CActor(world), sprite(nullptr), animation(nullptr),
+physics(nullptr), health(nullptr), gameManager(nullptr), speed(100.0f), direction(1.f), damage(25.f), scoreValue(50) {}
 
 Drone::~Drone()
 {
@@ -53,7 +59,10 @@ void Drone::BeginPlay()
     // FIXED: Create as SOLID collision (sensor = false for physical collision)
     physics->CreateBoxShape(60.0f, 60.0f, false);
 
-    ChimasLog::Info("Drone spawned at (%.1f, %.1f)", transform.position.x, transform.position.y);
+    health = AddComponent<CHPComponent>();
+    health->SetMaxHP(50.f);
+
+    ChimasLog::Info("Rusher spawned at (%.1f, %.1f)", transform.position.x, transform.position.y);
 }
 
 void Drone::Tick(float deltaTime)
@@ -96,8 +105,69 @@ void Drone::OnCollision(CActor* other)
     Missile* missile = dynamic_cast<Missile*>(other);
     if (missile)
     {
-        ChimasLog::Info("Drone hit by missile!");
-        Destroy();
+        ChimasLog::Info("Loner hit by missile!");
+
+        // Notify game manager
+        if (gameManager)
+        {
+            gameManager->AddScore(scoreValue);
+            gameManager->OnEnemyKilled();
+        }
+
+        takenDamage = missile->GetDamageValue(takenDamage);
+
+        // Reduce health instead of immediate destruction
+        health->ChangeHP(-takenDamage); // Missile deals 25 damage
+
+        ChimasLog::Info("Loner HP: %.1f / %.1f", health->GetCurrentHP(), health->GetMaxHP());
+
+        // Check if health depleted
+        if (health->GetCurrentHP() <= 0.0f)
+        {
+            ChimasLog::Info("Drone destroyed!");
+
+            if (gameManager)
+            {
+                gameManager->AddScore(scoreValue);
+                gameManager->OnEnemyKilled();
+            }
+
+            // Create floating text on death
+            CHUD* hud = world->GetHUD();
+            if (hud)
+            {
+                CFloatingTextWidget* floatingText = hud->CreateWidget<CFloatingTextWidget>();
+
+                // Load font
+                std::string fontPath = world->GetEngine()->ResolveAssetPath("Xenom/ImagesForGame/font16x16.bmp");
+                floatingText->LoadGridFont(fontPath, 16, 16, " !~#$%&'()*+,-./0123456789:;<=>?ÇABCDEFGHIJKLMNOPQRSTUVWXYZ[¨]^»`abcdefghijklmnopqrstuvwxyz{|}ªº");
+
+                // Convert game world position to screen position
+                // Game is rotated -90 degrees, so we need to transform:
+                // Original: (gameX, gameY) -> Screen: (gameY, screenHeight - gameX)
+                Vector2 gamePos = transform.position;
+                Vector2 screenBounds = world->GetWorldBounds();
+
+                // Transform rotated game coordinates to screen coordinates
+                Vector2 screenPos;
+                screenPos.x = screenBounds.x - gamePos.y;  // Game Y becomes screen X
+                screenPos.y = gamePos.x;  // Game X becomes inverted screen Y
+
+                floatingText->SetText("+" + std::to_string(scoreValue));
+                floatingText->SetTarget(nullptr);
+                floatingText->SetLifetime(1.5f);
+                floatingText->SetFloatSpeed(30.0f);
+                floatingText->SetScale(1.0f);
+                floatingText->SetPosition(screenPos);
+                floatingText->SetSize(Vector2(100.0f, 30.0f));
+                floatingText->SetHorizontalAlignment(CFloatingTextWidget::TextAlign::Center);
+
+                ChimasLog::Info("Floating text created for destroyed Loner");
+            }
+
+            Destroy();
+        }
+
         missile->OnCollision(this);
     }
 
@@ -105,15 +175,24 @@ void Drone::OnCollision(CActor* other)
     if (Spaceship)
     {
         ChimasLog::Info("Drone hit spaceship!");
-        Destroy();
 
-        Explosion* kabum = world->SpawnActor<Explosion>();
-        if (kabum)
+        Explosion* explosion = world->SpawnActor<Explosion>();
+        if (explosion)
         {
-            kabum->SetPosition(transform.position);
+            explosion->SetPosition(transform.position);
         }
 
-		// DEAL DAMAGE TO PLAYER
+        // Notify game manager
+        if (gameManager)
+        {
+            gameManager->OnEnemyKilled();
+        }
+
+        Destroy();
     }
 
+}
+float Drone::GetDamageValue(float enemyDamage)
+{
+    return damage;
 }

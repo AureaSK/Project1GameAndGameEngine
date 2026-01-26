@@ -10,10 +10,12 @@
 #include "EnemyProjectile.h"
 #include "Loner.h"
 #include "Rusher.h"
+#include "Drone.h"
+#include "GameManager.h"
 #include "ChimasLog.h"
 
 SpaceshipPawn::SpaceshipPawn(CWorld* world)
-    : CPawn(world), sprite(nullptr), animation(nullptr), health(nullptr), moveSpeed(300.0f), fireRate(0.2f), fireCooldown(0.0f) { }
+    : CPawn(world), sprite(nullptr), animation(nullptr), health(nullptr), gameManager(nullptr), moveSpeed(300.0f), fireRate(0.2f), fireCooldown(0.0f) { }
 
 SpaceshipPawn::~SpaceshipPawn()
 {
@@ -136,6 +138,12 @@ void SpaceshipPawn::Destroy()
     isPendingKill = true;
     ChimasLog::Info("GAME OVER - Player destroyed!");
 
+    // Notify game manager
+    if (gameManager)
+    {
+        gameManager->OnPlayerDeath();
+    }
+
     // Unpossess before destroying
     if (controller)
     {
@@ -149,15 +157,51 @@ void SpaceshipPawn::OnCollision(CActor* other)
     if (!other || other->IsPendingKill()) return;
 
     EnemyProjectile* eProject = dynamic_cast<EnemyProjectile*>(other);
+
     Loner* loner = dynamic_cast<Loner*>(other);
 
-    if (loner || eProject)
+    Rusher* rusher = dynamic_cast<Rusher*>(other);
+
+    Drone* drone = dynamic_cast<Drone*>(other);
+
+    if (loner)
     {
-        ChimasLog::Info("Player hit enemy - GAME OVER!");
+        ChimasLog::Info("Player hit enemy");
         other->OnCollision(this);
 
-        //Destroy();
+        takenDamage = loner->GetDamageValue(takenDamage);
 
-		//Deal damage instead of immediate destruction
+        health->ChangeHP(-takenDamage);
+    }
+    else if (eProject)
+    {
+        ChimasLog::Info("Player hit enemy projectile");
+        other->OnCollision(this);
+
+        takenDamage = eProject->GetDamageValue(takenDamage);
+
+        health->ChangeHP(-takenDamage);
+    }
+    else if (rusher)
+    {
+        ChimasLog::Info("Player hit enemy projectile");
+        other->OnCollision(this);
+
+        takenDamage = rusher->GetDamageValue(takenDamage);
+
+        health->ChangeHP(-takenDamage);
+    }
+    else if (drone)
+    {
+        ChimasLog::Info("Player hit enemy projectile");
+        other->OnCollision(this);
+
+        takenDamage = drone->GetDamageValue(takenDamage);
+
+        health->ChangeHP(-takenDamage);
+    }
+    if (health->GetCurrentHP() <= 0.0f)
+    {
+        Destroy();
     }
 }

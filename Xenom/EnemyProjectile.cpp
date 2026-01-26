@@ -9,7 +9,7 @@
 
 EnemyProjectile::EnemyProjectile(CWorld* world)
     : CActor(world), sprite(nullptr), animation(nullptr),
-    physics(nullptr), speed(250.0f)
+    physics(nullptr), speed(250.f), damage(25.f)
 {
 }
 
@@ -85,4 +85,9 @@ void EnemyProjectile::OnCollision(CActor* other)
     {
         Destroy();
     }
+}
+
+float EnemyProjectile::GetDamageValue(float projectileDamage)
+{
+    return damage;
 }

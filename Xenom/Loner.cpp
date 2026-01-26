@@ -13,10 +13,11 @@
 #include "CHUD.h"
 #include "CFloatingTextWidget.h"
 #include "CEngine.h"
+#include "GameManager.h"
 
 Loner::Loner(CWorld* world)
-    : CActor(world), sprite(nullptr), animation(nullptr), physics(nullptr), health(nullptr),
-    speed(200.0f), direction(1.0f), fireRate(5.0f), fireCooldown(1.0f), width(0.f), takenDamage(0.f){}
+    : CActor(world), sprite(nullptr), animation(nullptr), physics(nullptr), health(nullptr), gameManager(nullptr),
+    speed(200.0f), direction(1.0f), fireRate(5.0f), fireCooldown(1.0f), width(0.f), damage(50.f), takenDamage(0.f), scoreValue(100) {}
 
 Loner::~Loner()
 {
@@ -36,9 +37,9 @@ void Loner::BeginPlay()
 
     // Add animation component (64x64 tiles)
     animation = AddComponent<CAnimationComponent>();
-    animation->SetTileSize(64, 64); // Set tile size after creation
+    animation->SetTileSize(64, 64);
 
-    // Loner animation (first row)
+    // Loner animation
     animation->AddAnimation("move", {
         {0, 0, 0.1f}, {0, 1, 0.1f}, {0, 2, 0.1f}, {0, 3, 0.1f},
         {1, 0, 0.1f}, {1, 1, 0.1f}, {1, 2, 0.1f}, {1, 3, 0.1f},
@@ -49,9 +50,7 @@ void Loner::BeginPlay()
     animation->PlayAnimation("move");
 
     physics = AddComponent<CPhysicsComponent>();
-
     physics->SetFixedRotation(true);
-;
     physics->CreateBoxShape(32.0f, 32.0f, false);
     physics->SetCollisionFilter(
         CollisionCategory::ENEMY,
@@ -60,7 +59,6 @@ void Loner::BeginPlay()
 
     health = AddComponent<CHPComponent>();
     health->SetMaxHP(100.0f);
-   
 
     ChimasLog::Info("Loner spawned at (%.1f, %.1f)", transform.position.x, transform.position.y);
 }
@@ -82,12 +80,12 @@ void Loner::Tick(float deltaTime)
         fireCooldown = fireRate;
     }
 
-    if (transform.position.x >= width -30)
+    if (transform.position.x >= width - 30)
     {
         direction = -1.f;
-
-    } else if (transform.position.x <= 30) {
-
+    }
+    else if (transform.position.x <= 30)
+    {
         direction = 1.f;
     }
 }
@@ -125,6 +123,12 @@ void Loner::OnCollision(CActor* other)
         {
             ChimasLog::Info("Loner destroyed!");
 
+            if (gameManager)
+            {
+                gameManager->AddScore(scoreValue);
+                gameManager->OnEnemyKilled();
+            }
+
             // Create floating text on death
             CHUD* hud = world->GetHUD();
             if (hud)
@@ -146,16 +150,13 @@ void Loner::OnCollision(CActor* other)
                 screenPos.x = screenBounds.x - gamePos.y;  // Game Y becomes screen X
                 screenPos.y = gamePos.x;  // Game X becomes inverted screen Y
 
-                // Configure the floating text
-                floatingText->SetText("DESTROYED!");
-                floatingText->SetTarget(nullptr);  // Don't follow the actor since it's about to be destroyed
-                floatingText->SetLifetime(2.0f);
-                floatingText->SetFloatSpeed(10.0f);
-                floatingText->SetScale(.5f);
-
-                // Set position and size
+                floatingText->SetText("+" + std::to_string(scoreValue));
+                floatingText->SetTarget(nullptr);
+                floatingText->SetLifetime(1.5f);
+                floatingText->SetFloatSpeed(30.0f);
+                floatingText->SetScale(1.0f);
                 floatingText->SetPosition(screenPos);
-                floatingText->SetSize(Vector2(200.0f, 50.0f));
+                floatingText->SetSize(Vector2(100.0f, 30.0f));
                 floatingText->SetHorizontalAlignment(CFloatingTextWidget::TextAlign::Center);
 
                 ChimasLog::Info("Floating text created for destroyed Loner");
@@ -171,14 +172,22 @@ void Loner::OnCollision(CActor* other)
     if (Spaceship)
     {
         ChimasLog::Info("Rusher hit spaceship!");
-        Destroy();
-
+       
         Explosion* kabum = world->SpawnActor<Explosion>();
         if (kabum)
         {
             kabum->SetPosition(transform.position);
         }
 
-        // DEAL DAMAGE TO PLAYER
+        if (gameManager)
+        {
+            gameManager->OnEnemyKilled();
+        }
+
+        Destroy();
     }
+}
+float Loner::GetDamageValue(float enemyDamage)
+{
+    return damage;
 }

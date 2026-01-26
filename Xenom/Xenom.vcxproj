@@ -130,6 +130,7 @@
     <ClCompile Include="Drone.cpp" />
     <ClCompile Include="EnemyProjectile.cpp" />
     <ClCompile Include="Explosion.cpp" />
+    <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="Loner.cpp" />
     <ClCompile Include="Missile.cpp" />
     <ClCompile Include="PlayerController.cpp" />
@@ -145,6 +146,7 @@
     <ClInclude Include="Drone.h" />
     <ClInclude Include="EnemyProjectile.h" />
     <ClInclude Include="Explosion.h" />
+    <ClInclude Include="GameManager.h" />
     <ClInclude Include="Loner.h" />
     <ClInclude Include="Missile.h" />
     <ClInclude Include="PlayerController.h" />

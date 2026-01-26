@@ -6,6 +6,7 @@ class CSpriteComponent;
 class CAnimationComponent;
 class CPhysicsComponent;
 class CHPComponent;
+class GameManager;
 
 class SpaceshipPawn : public CPawn
 {
@@ -14,10 +15,13 @@ private:
     CAnimationComponent* animation;
     CPhysicsComponent* physics;
     CHPComponent* health;
+    GameManager* gameManager;
+
 
     float moveSpeed;
     float fireRate;
     float fireCooldown;
+    float takenDamage;
 
 public:
     SpaceshipPawn(CWorld* world);
@@ -32,5 +36,7 @@ public:
     // Methods called BY the controller
     void MoveInDirection(const Vector2& direction);
     void FireWeapon();
+
+    void SetGameManager(GameManager* manager) { gameManager = manager; }
 };
 
