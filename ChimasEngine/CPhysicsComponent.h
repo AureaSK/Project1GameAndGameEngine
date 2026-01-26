@@ -50,5 +50,6 @@ public:
 
     // Physics control
     void SetVelocity(const Vector2& velocity);
+    void SetPosition(const Vector2& position);
     Vector2 GetVelocity() const;
 };

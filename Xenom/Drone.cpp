@@ -4,6 +4,8 @@
 #include "CAnimationComponent.h"
 #include "CPhysicsComponent.h"
 #include "Missile.h"
+#include "SpaceshipPawn.h"
+#include "Explosion.h"
 #include "CWorld.h"
 #include "ChimasLog.h"
 
@@ -69,8 +71,10 @@ void Drone::Tick(float deltaTime)
         // Set horizontal position directly using sine wave
         float effectiveTime = timeAccumulator - timeOffset;
         float xPos = baseX + sin(effectiveTime * sineFrequency) * sineAmplitude;
+
         transform.position.x = xPos;
-        
+        physics->SetPosition(transform.position);
+
     }
 
 
@@ -88,12 +92,28 @@ void Drone::Tick(float deltaTime)
 void Drone::OnCollision(CActor* other)
 {
     if (IsPendingKill() || !other || other->IsPendingKill()) return;
+
     Missile* missile = dynamic_cast<Missile*>(other);
     if (missile)
     {
         ChimasLog::Info("Drone hit by missile!");
         Destroy();
         missile->OnCollision(this);
+    }
+
+    SpaceshipPawn* Spaceship = dynamic_cast<SpaceshipPawn*>(other);
+    if (Spaceship)
+    {
+        ChimasLog::Info("Drone hit spaceship!");
+        Destroy();
+
+        Explosion* kabum = world->SpawnActor<Explosion>();
+        if (kabum)
+        {
+            kabum->SetPosition(transform.position);
+        }
+
+		// DEAL DAMAGE TO PLAYER
     }
 
 }

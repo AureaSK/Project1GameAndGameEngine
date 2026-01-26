@@ -198,3 +198,19 @@ Vector2 CPhysicsComponent::GetVelocity() const
     b2Vec2 v = b2Body_GetLinearVelocity(impl->bodyId);
     return world->ToPixels(Vector2(v.x, v.y));
 }
+
+void CPhysicsComponent::SetPosition(const Vector2& position)
+{
+    if (!impl || B2_IS_NULL(impl->bodyId)) return;
+
+    CWorld* world = owner->GetWorld();
+    if (!world) return;
+
+    Vector2 m = world->ToMeters(position);
+
+    // Get current rotation to preserve it
+    b2Rot currentRotation = b2Body_GetRotation(impl->bodyId);
+
+    // Set transform with both position and rotation
+    b2Body_SetTransform(impl->bodyId, b2Vec2{ m.x, m.y }, currentRotation);
+}

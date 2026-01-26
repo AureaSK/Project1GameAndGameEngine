@@ -151,6 +151,9 @@ void SpaceshipPawn::OnCollision(CActor* other)
     {
         ChimasLog::Info("Player hit enemy - GAME OVER!");
         other->OnCollision(this);
-        Destroy();
+
+        //Destroy();
+
+		//Deal damage instead of immediate destruction
     }
 }

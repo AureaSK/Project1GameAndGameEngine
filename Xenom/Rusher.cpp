@@ -4,6 +4,8 @@
 #include "CAnimationComponent.h"
 #include "CPhysicsComponent.h"
 #include "Missile.h"
+#include "SpaceshipPawn.h"
+#include "Explosion.h"
 #include "CWorld.h"
 #include "ChimasLog.h"
 
@@ -82,6 +84,7 @@ void Rusher::Tick(float deltaTime)
 void Rusher::OnCollision(CActor* other)
 {
     if (IsPendingKill() || !other || other->IsPendingKill()) return;
+
     Missile* missile = dynamic_cast<Missile*>(other);
     if (missile)
     {
@@ -90,4 +93,18 @@ void Rusher::OnCollision(CActor* other)
         missile->OnCollision(this);
     }
 
+    SpaceshipPawn* Spaceship = dynamic_cast<SpaceshipPawn*>(other);
+    if (Spaceship)
+    {
+        ChimasLog::Info("Rusher hit spaceship!");
+        Destroy();
+
+        Explosion* kabum = world->SpawnActor<Explosion>();
+        if (kabum)
+        {
+            kabum->SetPosition(transform.position);
+        }
+
+        // DEAL DAMAGE TO PLAYER
+    }
 }

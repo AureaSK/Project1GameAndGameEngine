@@ -6,6 +6,8 @@
 #include "CPhysicsComponent.h"
 #include "CHPComponent.h"
 #include "Missile.h"
+#include "SpaceshipPawn.h"
+#include "Explosion.h"
 #include "CWorld.h"
 #include "ChimasLog.h"
 
@@ -123,5 +125,20 @@ void Loner::OnCollision(CActor* other)
         }
 
         missile->OnCollision(this);
+    }
+
+    SpaceshipPawn* Spaceship = dynamic_cast<SpaceshipPawn*>(other);
+    if (Spaceship)
+    {
+        ChimasLog::Info("Rusher hit spaceship!");
+        Destroy();
+
+        Explosion* kabum = world->SpawnActor<Explosion>();
+        if (kabum)
+        {
+            kabum->SetPosition(transform.position);
+        }
+
+        // DEAL DAMAGE TO PLAYER
     }
 }
