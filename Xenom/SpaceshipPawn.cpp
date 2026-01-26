@@ -10,6 +10,7 @@
 #include "EnemyProjectile.h"
 #include "Loner.h"
 #include "Rusher.h"
+#include "Drone.h"
 #include "ChimasLog.h"
 
 SpaceshipPawn::SpaceshipPawn(CWorld* world)
@@ -149,7 +150,12 @@ void SpaceshipPawn::OnCollision(CActor* other)
     if (!other || other->IsPendingKill()) return;
 
     EnemyProjectile* eProject = dynamic_cast<EnemyProjectile*>(other);
+
     Loner* loner = dynamic_cast<Loner*>(other);
+
+    Rusher* rusher = dynamic_cast<Rusher*>(other);
+
+    Drone* drone = dynamic_cast<Drone*>(other);
 
     if (loner)
     {
@@ -159,7 +165,6 @@ void SpaceshipPawn::OnCollision(CActor* other)
         takenDamage = loner->GetDamageValue(takenDamage);
 
         health->ChangeHP(-takenDamage);
-		//Deal damage instead of immediate destruction
     }
     else if (eProject)
     {
@@ -167,6 +172,24 @@ void SpaceshipPawn::OnCollision(CActor* other)
         other->OnCollision(this);
 
         takenDamage = eProject->GetDamageValue(takenDamage);
+
+        health->ChangeHP(-takenDamage);
+    }
+    else if (rusher)
+    {
+        ChimasLog::Info("Player hit enemy projectile");
+        other->OnCollision(this);
+
+        takenDamage = rusher->GetDamageValue(takenDamage);
+
+        health->ChangeHP(-takenDamage);
+    }
+    else if (drone)
+    {
+        ChimasLog::Info("Player hit enemy projectile");
+        other->OnCollision(this);
+
+        takenDamage = drone->GetDamageValue(takenDamage);
 
         health->ChangeHP(-takenDamage);
     }

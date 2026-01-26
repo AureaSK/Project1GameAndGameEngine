@@ -3,13 +3,17 @@
 #include "CSpriteComponent.h"
 #include "CAnimationComponent.h"
 #include "CPhysicsComponent.h"
+#include "CHPComponent.h"
 #include "Missile.h"
 #include "SpaceshipPawn.h"
 #include "Explosion.h"
 #include "CWorld.h"
 #include "ChimasLog.h"
+#include "CHUD.h"
+#include "CFloatingTextWidget.h"
+#include "CEngine.h"
 
-Rusher::Rusher(CWorld* world) : CActor(world), sprite(nullptr), animation(nullptr), physics(nullptr), speed(100.0f), direction(1.f) {}
+Rusher::Rusher(CWorld* world) : CActor(world), sprite(nullptr), animation(nullptr), physics(nullptr), health(nullptr), speed(100.0f), direction(1.f), damage(25.f) {}
 
 Rusher::~Rusher()
 {
@@ -57,6 +61,9 @@ void Rusher::BeginPlay()
     // FIXED: Create as SOLID collision (sensor = false for physical collision)
     physics->CreateBoxShape(60.0f, 60.0f, false);
 
+    health = AddComponent<CHPComponent>();
+    health->SetMaxHP(100.0f);
+
     ChimasLog::Info("Rusher spawned at (%.1f, %.1f)", transform.position.x, transform.position.y);
 }
 
@@ -83,13 +90,66 @@ void Rusher::Tick(float deltaTime)
 
 void Rusher::OnCollision(CActor* other)
 {
-    if (IsPendingKill() || !other || other->IsPendingKill()) return;
+    // Always check validity first
+    if (IsPendingKill() || !other || other->IsPendingKill())
+        return;
 
     Missile* missile = dynamic_cast<Missile*>(other);
     if (missile)
     {
-        ChimasLog::Info("Rusher hit by missile!");
-        Destroy();
+        ChimasLog::Info("Loner hit by missile!");
+
+        takenDamage = missile->GetDamageValue(takenDamage);
+
+        // Reduce health instead of immediate destruction
+        health->ChangeHP(-takenDamage); // Missile deals 25 damage
+
+        ChimasLog::Info("Loner HP: %.1f / %.1f", health->GetCurrentHP(), health->GetMaxHP());
+
+        // Check if health depleted
+        if (health->GetCurrentHP() <= 0.0f)
+        {
+            ChimasLog::Info("Loner destroyed!");
+
+            // Create floating text on death
+            CHUD* hud = world->GetHUD();
+            if (hud)
+            {
+                CFloatingTextWidget* floatingText = hud->CreateWidget<CFloatingTextWidget>();
+
+                // Load font
+                std::string fontPath = world->GetEngine()->ResolveAssetPath("Xenom/ImagesForGame/font16x16.bmp");
+                floatingText->LoadGridFont(fontPath, 16, 16, " !~#$%&'()*+,-./0123456789:;<=>?ÇABCDEFGHIJKLMNOPQRSTUVWXYZ[¨]^»`abcdefghijklmnopqrstuvwxyz{|}ªº");
+
+                // Convert game world position to screen position
+                // Game is rotated -90 degrees, so we need to transform:
+                // Original: (gameX, gameY) -> Screen: (gameY, screenHeight - gameX)
+                Vector2 gamePos = transform.position;
+                Vector2 screenBounds = world->GetWorldBounds();
+
+                // Transform rotated game coordinates to screen coordinates
+                Vector2 screenPos;
+                screenPos.x = screenBounds.x - gamePos.y;  // Game Y becomes screen X
+                screenPos.y = gamePos.x;  // Game X becomes inverted screen Y
+
+                // Configure the floating text
+                floatingText->SetText("DESTROYED!");
+                floatingText->SetTarget(nullptr);  // Don't follow the actor since it's about to be destroyed
+                floatingText->SetLifetime(2.0f);
+                floatingText->SetFloatSpeed(10.0f);
+                floatingText->SetScale(.5f);
+
+                // Set position and size
+                floatingText->SetPosition(screenPos);
+                floatingText->SetSize(Vector2(200.0f, 50.0f));
+                floatingText->SetHorizontalAlignment(CFloatingTextWidget::TextAlign::Center);
+
+                ChimasLog::Info("Floating text created for destroyed Loner");
+            }
+
+            Destroy();
+        }
+
         missile->OnCollision(this);
     }
 
@@ -107,4 +167,8 @@ void Rusher::OnCollision(CActor* other)
 
         // DEAL DAMAGE TO PLAYER
     }
+}
+float Rusher::GetDamageValue(float enemyDamage)
+{
+    return damage;
 }
