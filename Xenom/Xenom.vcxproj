@@ -132,6 +132,9 @@
     <ClCompile Include="Explosion.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="Loner.cpp" />
+    <ClCompile Include="MetalAsteroidBig.cpp" />
+    <ClCompile Include="MetalAsteroidMedium.cpp" />
+    <ClCompile Include="MetalAsteroidSmall.cpp" />
     <ClCompile Include="Missile.cpp" />
     <ClCompile Include="PlayerController.cpp" />
     <ClCompile Include="Rusher.cpp" />
@@ -148,6 +151,9 @@
     <ClInclude Include="Explosion.h" />
     <ClInclude Include="GameManager.h" />
     <ClInclude Include="Loner.h" />
+    <ClInclude Include="MetalAsteroidBig.h" />
+    <ClInclude Include="MetalAsteroidMedium.h" />
+    <ClInclude Include="MetalAsteroidSmall.h" />
     <ClInclude Include="Missile.h" />
     <ClInclude Include="PlayerController.h" />
     <ClInclude Include="Rusher.h" />

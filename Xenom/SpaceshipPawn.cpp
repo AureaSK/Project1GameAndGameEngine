@@ -14,6 +14,9 @@
 #include "StoneAsteroidBig.h"
 #include "StoneAsteroidMedium.h"
 #include "StoneAsteroidSmall.h"
+#include "MetalAsteroidBig.h"
+#include "MetalAsteroidMedium.h"
+#include "MetalAsteroidSmall.h"
 #include "GameManager.h"
 #include "ChimasLog.h"
 
@@ -172,11 +175,19 @@ void SpaceshipPawn::OnCollision(CActor* other)
 
     Drone* drone = dynamic_cast<Drone*>(other);
 
+    //Stone
 	StoneAsteroidBig* bigAsteroid = dynamic_cast<StoneAsteroidBig*>(other);
 
 	StoneAsteroidMedium* mediumAsteroid = dynamic_cast<StoneAsteroidMedium*>(other);
 
 	StoneAsteroidSmall* smallAsteroid = dynamic_cast<StoneAsteroidSmall*>(other);
+
+	//Metal
+    MetalAsteroidBig* bigMetalAsteroid = dynamic_cast<MetalAsteroidBig*>(other);
+
+    MetalAsteroidMedium* mediumMetalAsteroid = dynamic_cast<MetalAsteroidMedium*>(other);
+
+    MetalAsteroidSmall* smallMetalAsteroid = dynamic_cast<MetalAsteroidSmall*>(other);
 
     if (loner)
     {
@@ -241,7 +252,33 @@ void SpaceshipPawn::OnCollision(CActor* other)
 
 		health->ChangeHP(-takenDamage);
 	}
-	
+    else if (bigMetalAsteroid)
+    {
+        ChimasLog::Info("Player hit big metal asteroid");
+        other->OnCollision(this);
+
+        takenDamage = bigMetalAsteroid->GetDamageValue(takenDamage);
+
+        health->ChangeHP(-takenDamage);
+    }
+    else if (mediumMetalAsteroid)
+    {
+        ChimasLog::Info("Player hit medium metal asteroid");
+        other->OnCollision(this);
+
+        takenDamage = mediumMetalAsteroid->GetDamageValue(takenDamage);
+
+        health->ChangeHP(-takenDamage);
+    }
+    else if (smallMetalAsteroid)
+    {
+        ChimasLog::Info("Player hit small metal asteroid");
+        other->OnCollision(this);
+
+        takenDamage = smallMetalAsteroid->GetDamageValue(takenDamage);
+
+        health->ChangeHP(-takenDamage);
+    }
 
 
     if (gameManager)
