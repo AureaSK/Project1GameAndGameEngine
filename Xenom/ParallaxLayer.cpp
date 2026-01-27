@@ -22,44 +22,50 @@ void ParallaxLayer::Tick(float deltaTime)
 {
     CActor::Tick(deltaTime);
 
-    // Scroll downward
     currentOffset += scrollSpeed * deltaTime;
 
-    // Wrap around when we've scrolled a full layer height
-    if (currentOffset >= layerHeight)
+    Vector2 worldBounds = world->GetWorldBounds();
+    float screenHeight = worldBounds.y;
+
+    if (currentOffset >= screenHeight)
     {
-        currentOffset -= layerHeight;
+        currentOffset = -layerHeight;
     }
 
-    // Update actor position for vertical scrolling
     Vector2 pos = GetPosition();
     pos.y = currentOffset;
     SetPosition(pos);
 }
 
-bool ParallaxLayer::Setup(const std::string& texturePath, int srcX, int srcY, int srcWidth, int srcHeight, float speed)
+bool ParallaxLayer::Setup(const std::string& texturePath, int srcX, int srcY, int srcWidth, int srcHeight, float speed, float scale)
 {
     scrollSpeed = speed;
-    layerHeight = (float)srcHeight;
 
     // Create sprite component
     sprite = AddComponent<CSpriteComponent>();
     if (!sprite->LoadTexture(texturePath))
     {
-        //ChimasLog::Error("ParallaxLayer: Failed to load texture: %s", texturePath.c_str());
+        ChimasLog::Info("ParallaxLayer: Failed to load texture: %s", texturePath.c_str());
         return false;
     }
 
     // Set source rectangle from sprite sheet
     sprite->SetSourceRect((float)srcX, (float)srcY, (float)srcWidth, (float)srcHeight);
 
-    // Use EXACT dimensions from sprite sheet (NO STRETCHING!)
-    sprite->SetSize((float)srcWidth, (float)srcHeight);
+    // Apply scale to dimensions
+    float scaledWidth = (float)srcWidth * scale;
+    float scaledHeight = (float)srcHeight * scale;
 
-    // CRITICAL: Use top-left positioning so position = exact screen location
+    sprite->SetSize(scaledWidth, scaledHeight);
+
+ 
+    layerHeight = scaledHeight;
+
     sprite->UseTopLeftPositioning(true);
 
-    ChimasLog::Info("ParallaxLayer setup: size=(%dx%d), speed=%.2f",
-        srcWidth, srcHeight, speed);
+    currentOffset = -layerHeight;
+
+    ChimasLog::Info("ParallaxLayer setup: original=(%dx%d), scaled=(%.0fx%.0f), scale=%.2f, speed=%.2f, startPos=%.0f",
+        srcWidth, srcHeight, scaledWidth, scaledHeight, scale, speed, currentOffset);
     return true;
 }

@@ -39,38 +39,12 @@ int main()
         ParallaxBackground* parallaxBG = world->SpawnActor<ParallaxBackground>();
         if (parallaxBG)
         {
-            parallaxBG->LoadSpriteSheet("Xenom/ImagesForGame/Blocks.bmp");
+            parallaxBG->LoadSpriteSheet("Xenom/ImagesForGame/Blocks2.bmp");
             parallaxBG->SetBaseScrollSpeed(30.0f);
 
-            /*
-             * SCREEN LAYOUT (800x800):
-             *
-             *   0                  400                800
-             *   |-------------------|-------------------|
-             *   |                   |                   |
-             *   |   LEFT LAYER      |   RIGHT LAYER     |
-             *   |   (400x800)       |   (400x800)       |
-             *   |                   |                   |
-             *   |-------------------|-------------------|
-             *
-             * Each layer is 400 pixels wide, positioned side-by-side
-             * Position is the TOP-LEFT corner of each sprite
-             */
+            parallaxBG->AddLayerFromSection(1376, 0, 64, 352, 3.f, height-64.f, 300.f, 2.f);
 
-             // LEFT LAYER - positioned at (0, 0) - top-left corner of screen
-            parallaxBG->AddLayerFromSection(
-                0, 832,      // Grab from sprite sheet at pixel (0, 832)
-                400, 800,    // Size: 400 wide x 800 tall - NO STRETCHING!
-                0.5f,        // Speed multiplier
-                0.0f, 0.0f   // Screen position: LEFT edge (x=0, y=0)
-            );
-
-            parallaxBG->AddLayerFromSection(
-                0, 832,      // Grab from sprite sheet at pixel (0, 832)
-                400, 800,    // Size: 400 wide x 800 tall - NO STRETCHING!
-                0.5f,        // Speed multiplier
-                0.0f, 0.0f   // Screen position: LEFT edge (x=0, y=0)
-            );
+            parallaxBG->AddLayerFromSection(1376, 0, 64, 352, 3.f, -30.f, 300.f, 2.f);
 
             ChimasLog::Info("✓ Parallax: 2 layers (400x800 each), side-by-side, NO STRETCH");
         }

@@ -11,16 +11,14 @@ class CSpriteComponent : public CComponent
 private:
     CEngineTexture* texture;
     RectF renderRect;
-    RectF sourceRect;  // For sprite sheets
+    RectF sourceRect;
     bool ownsTexture;
     bool useSourceRect;
 
-    // Rendering properties
     float alpha;
     Color tintColor;
     FlipMode flipMode;
 
-    // NEW: Simple flag - use top-left positioning instead of centered
     bool useTopLeftPositioning;
 
 public:
@@ -53,7 +51,6 @@ public:
     void SetTint(const Color& color) { tintColor = color; }
     void SetFlip(FlipMode flip) { flipMode = flip; }
 
-    // Getters
     CEngineTexture* GetTexture() const { return texture; }
     RectF GetRenderRect() const { return renderRect; }
     RectF GetSourceRect() const { return sourceRect; }

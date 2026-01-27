@@ -11,7 +11,7 @@ ParallaxBackground::ParallaxBackground(CWorld* world)
 
 ParallaxBackground::~ParallaxBackground()
 {
-    // Layers are cleaned up by CWorld
+    
 }
 
 void ParallaxBackground::BeginPlay()
@@ -24,7 +24,6 @@ void ParallaxBackground::Tick(float deltaTime)
 {
     CActor::Tick(deltaTime);
 
-    // Update all layer speeds if base speed changes
     for (ParallaxLayer* layer : layers)
     {
         if (layer)
@@ -42,11 +41,10 @@ bool ParallaxBackground::LoadSpriteSheet(const std::string& texturePath)
 }
 
 bool ParallaxBackground::AddLayerFromSection(int srcX, int srcY, int srcWidth, int srcHeight,
-    float speedMultiplier, float posX, float posY)
+    float speedMultiplier, float posX, float posY, float scale)
 {
     if (spriteSheetPath.empty())
     {
-        //ChimasLog::Error("Must call LoadSpriteSheet before adding layers!");
         return false;
     }
 
@@ -54,30 +52,23 @@ bool ParallaxBackground::AddLayerFromSection(int srcX, int srcY, int srcWidth, i
     ParallaxLayer* layer = world->SpawnActor<ParallaxLayer>();
     if (!layer)
     {
-        //ChimasLog::Error("Failed to spawn ParallaxLayer actor!");
         return false;
     }
 
-    // Calculate actual scroll speed for this layer
     float layerSpeed = baseScrollSpeed * speedMultiplier;
 
-    // Setup the layer with sprite sheet section
-    if (!layer->Setup(spriteSheetPath, srcX, srcY, srcWidth, srcHeight, layerSpeed))
+    if (!layer->Setup(spriteSheetPath, srcX, srcY, srcWidth, srcHeight, layerSpeed, scale))
     {
-        //ChimasLog::Error("Failed to setup parallax layer!");
         layer->Destroy();
         return false;
     }
 
-    // Position the layer at the specified position
-    // Since we're using top-left pivot, this is now the EXACT position
     layer->SetPosition(Vector2(posX, posY));
 
-    // Store reference
     layers.push_back(layer);
 
-    ChimasLog::Info("Added parallax layer from section (%d, %d, %d, %d) at pos (%.1f, %.1f) - speed: %.2f",
-        srcX, srcY, srcWidth, srcHeight, posX, posY, layerSpeed);
+    ChimasLog::Info("Added parallax layer from section (%d, %d, %d, %d) at pos (%.1f, %.1f) - speed: %.2f, scale: %.2f",
+        srcX, srcY, srcWidth, srcHeight, posX, posY, layerSpeed, scale);
 
     return true;
 }
