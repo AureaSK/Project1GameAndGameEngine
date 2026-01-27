@@ -19,6 +19,7 @@
 #include "CTextWidget.h"
 #include "GameManager.h"
 #include "CImageWidget.h"
+#include "ParallaxBackground.h"
 
 int main()
 {
@@ -35,7 +36,46 @@ int main()
     {
         world->CreateBoundaryWalls(Width, height);
 
-        // Spawn the Game Manager FIRST
+        ParallaxBackground* parallaxBG = world->SpawnActor<ParallaxBackground>();
+        if (parallaxBG)
+        {
+            parallaxBG->LoadSpriteSheet("Xenom/ImagesForGame/Blocks.bmp");
+            parallaxBG->SetBaseScrollSpeed(30.0f);
+
+            /*
+             * SCREEN LAYOUT (800x800):
+             *
+             *   0                  400                800
+             *   |-------------------|-------------------|
+             *   |                   |                   |
+             *   |   LEFT LAYER      |   RIGHT LAYER     |
+             *   |   (400x800)       |   (400x800)       |
+             *   |                   |                   |
+             *   |-------------------|-------------------|
+             *
+             * Each layer is 400 pixels wide, positioned side-by-side
+             * Position is the TOP-LEFT corner of each sprite
+             */
+
+             // LEFT LAYER - positioned at (0, 0) - top-left corner of screen
+            parallaxBG->AddLayerFromSection(
+                0, 832,      // Grab from sprite sheet at pixel (0, 832)
+                400, 800,    // Size: 400 wide x 800 tall - NO STRETCHING!
+                0.5f,        // Speed multiplier
+                0.0f, 0.0f   // Screen position: LEFT edge (x=0, y=0)
+            );
+
+            parallaxBG->AddLayerFromSection(
+                0, 832,      // Grab from sprite sheet at pixel (0, 832)
+                400, 800,    // Size: 400 wide x 800 tall - NO STRETCHING!
+                0.5f,        // Speed multiplier
+                0.0f, 0.0f   // Screen position: LEFT edge (x=0, y=0)
+            );
+
+            ChimasLog::Info("✓ Parallax: 2 layers (400x800 each), side-by-side, NO STRETCH");
+        }
+
+        // Spawn the Game Manager
         GameManager* gameManager = world->SpawnActor<GameManager>();
 
         // Spawn the player controller
@@ -46,18 +86,14 @@ int main()
         if (spaceshipPawn)
         {
             spaceshipPawn->SetPosition(Vector2(Width / 2, (height / 5) * 4));
-            spaceshipPawn->SetGameManager(gameManager); // Link to game manager
+            spaceshipPawn->SetGameManager(gameManager);
 
-            // Have the player controller possess the spaceship pawn
             if (playerController)
             {
                 playerController->Possess(spaceshipPawn);
                 ChimasLog::Info("PlayerController possessed SpaceshipPawn");
             }
         }
-
-        // NOTE: Enemies are now spawned by GameManager in waves
-        // Remove manual enemy spawning from here
 
         world->BeginPlay();
     }

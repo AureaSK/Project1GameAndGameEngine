@@ -8,7 +8,8 @@
 
 CSpriteComponent::CSpriteComponent(CActor* owner)
     : CComponent(owner), texture(nullptr), ownsTexture(false), useSourceRect(false),
-    alpha(1.0f), tintColor(Color::White()), flipMode(FlipMode::None)
+    alpha(1.0f), tintColor(Color::White()), flipMode(FlipMode::None),
+    useTopLeftPositioning(false)  // Default to center positioning
 {
     renderRect = RectF(0.0f, 0.0f, 64.0f, 64.0f);
     sourceRect = RectF(0.0f, 0.0f, 0.0f, 0.0f);
@@ -125,9 +126,19 @@ void CSpriteComponent::Render(const Vector2& position, float rotation)
 
     CEngineRender* renderer = engine->GetRenderer();
 
-    // Center sprite on actor position
-    renderRect.x = position.x - (renderRect.w / 2.0f);
-    renderRect.y = position.y - (renderRect.h / 2.0f);
+    // SIMPLIFIED POSITIONING
+    if (useTopLeftPositioning)
+    {
+        // Position is top-left corner - NO OFFSET
+        renderRect.x = position.x;
+        renderRect.y = position.y;
+    }
+    else
+    {
+        // Position is center - apply centering offset
+        renderRect.x = position.x - (renderRect.w / 2.0f);
+        renderRect.y = position.y - (renderRect.h / 2.0f);
+    }
 
     // Convert to SDL_FRect
     SDL_FRect dst{ renderRect.x, renderRect.y, renderRect.w, renderRect.h };

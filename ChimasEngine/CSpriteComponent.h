@@ -20,6 +20,9 @@ private:
     Color tintColor;
     FlipMode flipMode;
 
+    // NEW: Simple flag - use top-left positioning instead of centered
+    bool useTopLeftPositioning;
+
 public:
     CSpriteComponent(CActor* owner);
     virtual ~CSpriteComponent();
@@ -41,6 +44,10 @@ public:
     void SetSourceRect(float x, float y, float w, float h);
     void ClearSourceRect();
 
+    // NEW: Simple positioning control
+    void UseTopLeftPositioning(bool enabled) { useTopLeftPositioning = enabled; }
+    void UseCenterPositioning() { useTopLeftPositioning = false; }
+
     // Visual properties
     void SetAlpha(float a) { alpha = a; }
     void SetTint(const Color& color) { tintColor = color; }
@@ -52,4 +59,3 @@ public:
     RectF GetSourceRect() const { return sourceRect; }
     float GetAlpha() const { return alpha; }
 };
-

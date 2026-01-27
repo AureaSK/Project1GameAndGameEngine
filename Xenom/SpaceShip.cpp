@@ -31,7 +31,7 @@ void Spaceship::BeginPlay()
     {
         sprite->SetSize(64.0f, 64.0f);
     }
-
+    
     // Add animation component
     animation = AddComponent<CAnimationComponent>();
     animation->SetTileSize(64, 64);
