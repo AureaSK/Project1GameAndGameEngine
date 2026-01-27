@@ -18,6 +18,7 @@
     <ClCompile Include="MetalAsteroidBig.cpp" />
     <ClCompile Include="MetalAsteroidMedium.cpp" />
     <ClCompile Include="MetalAsteroidSmall.cpp" />
+    <ClCompile Include="ShieldPowerUp.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Drone.h" />
@@ -36,5 +37,6 @@
     <ClInclude Include="MetalAsteroidBig.h" />
     <ClInclude Include="MetalAsteroidMedium.h" />
     <ClInclude Include="MetalAsteroidSmall.h" />
+    <ClInclude Include="ShieldPowerUp.h" />
   </ItemGroup>
 </Project>

@@ -138,6 +138,7 @@
     <ClCompile Include="Missile.cpp" />
     <ClCompile Include="PlayerController.cpp" />
     <ClCompile Include="Rusher.cpp" />
+    <ClCompile Include="ShieldPowerUp.cpp" />
     <ClCompile Include="SpaceShip.cpp" />
     <ClCompile Include="SpaceshipPawn.cpp" />
     <ClCompile Include="StoneAsteroidBig.cpp" />
@@ -157,6 +158,7 @@
     <ClInclude Include="Missile.h" />
     <ClInclude Include="PlayerController.h" />
     <ClInclude Include="Rusher.h" />
+    <ClInclude Include="ShieldPowerUp.h" />
     <ClInclude Include="SpaceShip.h" />
     <ClInclude Include="SpaceshipPawn.h" />
     <ClInclude Include="StoneAsteroidBig.h" />

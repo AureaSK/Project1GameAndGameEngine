@@ -13,6 +13,7 @@
 #include "MetalAsteroidBig.h"
 #include "MetalAsteroidMedium.h"
 #include "MetalAsteroidSmall.h"
+#include "ShieldPowerUp.h"
 #include "ChimasLog.h"
 #include <string>
 #include <random>
@@ -135,6 +136,10 @@ void GameManager::SpawnWave()
     default: smallMetalAsteroidsToSpawn = 2; break;
     }
 
+    //Power Up (Heal)
+    int shieldPowerUpsToSpawn = (currentWave % 2 == 0) ? 1 : 0; //spawn 1 on every even wave
+
+
     SpawnLoners(lonersToSpawn);
     SpawnRushers(rushersToSpawn);
     SpawnDrones(dronesToSpawn);
@@ -144,6 +149,7 @@ void GameManager::SpawnWave()
     SpawnBigMetalAsteroid(bigMetalAsteroidsToSpawn);
     SpawnMediumMetalAsteroid(mediumMetalAsteroidsToSpawn);
     SpawnSmallMetalAsteroid(smallMetalAsteroidsToSpawn);
+    SpawnShieldPowerUp(shieldPowerUpsToSpawn);
 
     enemiesAlive = lonersToSpawn + rushersToSpawn + (dronesToSpawn*3);
 
@@ -342,6 +348,26 @@ void GameManager::SpawnSmallMetalAsteroid(int count)
 
             smallMetalAsteroid->SetPosition(Vector2(distX(gen), -distY(gen)));
             
+        }
+
+    }
+}
+
+void GameManager::SpawnShieldPowerUp(int count)
+{
+    for (int i = 0; i < count; i++)
+    {
+        ShieldPowerUp* shieldPowerUp = world->SpawnActor<ShieldPowerUp>();
+
+        if (shieldPowerUp)
+        {
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_int_distribution<> distX(100, 700);
+            std::uniform_int_distribution<> distY(200, 1000);
+
+            shieldPowerUp->SetPosition(Vector2(distX(gen), -distY(gen)));
+
         }
 
     }

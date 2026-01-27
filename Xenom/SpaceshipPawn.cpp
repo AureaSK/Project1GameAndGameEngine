@@ -17,6 +17,7 @@
 #include "MetalAsteroidBig.h"
 #include "MetalAsteroidMedium.h"
 #include "MetalAsteroidSmall.h"
+#include "ShieldPowerUp.h"
 #include "GameManager.h"
 #include "ChimasLog.h"
 
@@ -189,6 +190,9 @@ void SpaceshipPawn::OnCollision(CActor* other)
 
     MetalAsteroidSmall* smallMetalAsteroid = dynamic_cast<MetalAsteroidSmall*>(other);
 
+    //Power Up (Heal)
+    ShieldPowerUp* shieldPowerUp = dynamic_cast<ShieldPowerUp*>(other);
+
     if (loner)
     {
         ChimasLog::Info("Player hit enemy");
@@ -278,6 +282,15 @@ void SpaceshipPawn::OnCollision(CActor* other)
         takenDamage = smallMetalAsteroid->GetDamageValue(takenDamage);
 
         health->ChangeHP(-takenDamage);
+    }
+    else if (shieldPowerUp)
+    {
+        ChimasLog::Info("Player hit small metal asteroid");
+        other->OnCollision(this);
+
+        takenDamage = shieldPowerUp->GetDamageValue(takenDamage);
+
+        health->ChangeHP(takenDamage); //heal instead of taking damage
     }
 
 
