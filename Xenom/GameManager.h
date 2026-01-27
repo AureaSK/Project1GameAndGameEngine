@@ -11,10 +11,12 @@ private:
     int currentWave;
     int enemiesAlive;
     int enemiesPerWave;
+	int highScore;
     float waveSpawnDelay;
     float waveTimer;
     bool isGameOver;
 
+    CTextWidget* highScoreText;
     CTextWidget* scoreText;
     CTextWidget* waveText;
     CTextWidget* healthText;
@@ -37,6 +39,9 @@ public:
     // Score management
     void AddScore(int points);
     int GetScore() const { return playerScore; }
+
+	void SaveHighScore(int score);
+	int LoadHighScore();
 
     void UpdateHealthDisplay(float currentHP, float maxHP);
 

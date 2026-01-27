@@ -61,7 +61,7 @@ void EnemyProjectile::Tick(float deltaTime)
     }
 
     // Destroy if off screen
-    if (transform.position.y > 620.0f)
+    if (transform.position.y > (world->GetWorldBounds().y + 20))
     {
         Destroy();
     }

@@ -53,7 +53,7 @@ void Drone::BeginPlay()
     // FIXED: Set collision filter BEFORE creating shape
     physics->SetCollisionFilter(
         CollisionCategory::ENEMY,
-        CollisionCategory::PLAYER | CollisionCategory::PLAYER_PROJECTILE | CollisionCategory::WALL
+        CollisionCategory::PLAYER | CollisionCategory::PLAYER_PROJECTILE
     );
 
     // FIXED: Create as SOLID collision (sensor = false for physical collision)
@@ -105,14 +105,14 @@ void Drone::OnCollision(CActor* other)
     Missile* missile = dynamic_cast<Missile*>(other);
     if (missile)
     {
-        ChimasLog::Info("Loner hit by missile!");
+        ChimasLog::Info("Drone hit by missile!");
 
         takenDamage = missile->GetDamageValue(takenDamage);
 
         // Reduce health instead of immediate destruction
         health->ChangeHP(-takenDamage); // Missile deals 25 damage
 
-        ChimasLog::Info("Loner HP: %.1f / %.1f", health->GetCurrentHP(), health->GetMaxHP());
+        ChimasLog::Info("Drone HP: %.1f / %.1f", health->GetCurrentHP(), health->GetMaxHP());
 
         // Check if health depleted
         if (health->GetCurrentHP() <= 0.0f)

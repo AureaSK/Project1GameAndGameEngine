@@ -18,10 +18,15 @@ private:
 	float speed;
 	float direction;
 
+	int scoreValue;
+	float damage;
+	float takenDamage;
 
 public:
 	StoneAsteroidBig(CWorld* world);
 	virtual ~StoneAsteroidBig();
+
+	float GetDamageValue(float asteroidDamage);
 
 	void OnCollision(CActor* other);
 

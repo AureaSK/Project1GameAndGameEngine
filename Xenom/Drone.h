@@ -24,8 +24,8 @@ private:
     float sineFrequency = 3.0f;    // How fast it oscillates
     float sineAmplitude = 100.0f;   // How far it moves side to side
 	float baseX = 200.0f;		   // Center X position for the wave
+	
 	int scoreValue;
-
 	float damage;
 	float takenDamage;
 	
@@ -44,4 +44,3 @@ public:
 	void SetTimeOffset(float offset) { timeOffset = offset; }
 	void SetBaseX(float x) { baseX = x; }
 };
-

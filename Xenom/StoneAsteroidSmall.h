@@ -17,17 +17,23 @@ private:
 	CHPComponent* health;
 	GameManager* gameManager;
 	float speed;
-	float direction;
+	Vector2 direction;
 
+	int scoreValue;
+	float damage;
+	float takenDamage;
 
 public:
 	StoneAsteroidSmall(CWorld* world);
 	virtual ~StoneAsteroidSmall();
+
+	float GetDamageValue(float asteroidDamage);
 
 	void OnCollision(CActor* other);
 
 	virtual void BeginPlay() override;
 	virtual void Tick(float deltaTime) override;
 	void SetGameManager(GameManager* manager) { gameManager = manager; }
+	void SetDirection(Vector2 dir) { direction = dir; }
 };
 

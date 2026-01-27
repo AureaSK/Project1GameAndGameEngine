@@ -13,11 +13,13 @@
 #include "ChimasLog.h"
 #include <string>
 #include <random>
+#include <fstream>
 
 GameManager::GameManager(CWorld* world)
     : CActor(world), playerScore(0), currentWave(0), enemiesAlive(0),
     enemiesPerWave(5), waveSpawnDelay(3.0f), waveTimer(0.0f),
-    isGameOver(false), scoreText(nullptr), waveText(nullptr)
+	isGameOver(false), scoreText(nullptr), waveText(nullptr), 
+    healthText(nullptr), highScoreText(nullptr)
 {
 }
 
@@ -29,6 +31,7 @@ GameManager::~GameManager()
 void GameManager::BeginPlay()
 {
     CActor::BeginPlay();
+	highScore = LoadHighScore();
 
     CHUD* hud = world->GetHUD();
     if (hud)
@@ -42,6 +45,15 @@ void GameManager::BeginPlay()
         scoreText->SetSize(Vector2(300.0f, 30.0f));
         scoreText->SetScale(1.0f);
         scoreText->SetHorizontalAlignment(CTextWidget::TextAlign::Left);
+
+        // Create score display (top-middle)
+        highScoreText = hud->CreateWidget<CTextWidget>();
+        highScoreText->LoadGridFont(fontPath, 16, 16, " !~#$%&'()*+,-./0123456789:;<=>?ÇABCDEFGHIJKLMNOPQRSTUVWXYZ[¨]^»`abcdefghijklmnopqrstuvwxyz{|}ªº");
+        highScoreText->SetText("HIGH SCORE\n\n   " + std::to_string(highScore));
+        highScoreText->SetPosition(Vector2(325.0f, 10.0f));
+        highScoreText->SetSize(Vector2(300.0f, 30.0f));
+        highScoreText->SetScale(0.75f);
+        highScoreText->SetHorizontalAlignment(CTextWidget::TextAlign::Left);
 
         // Create wave display (top-right)
         waveText = hud->CreateWidget<CTextWidget>();
@@ -95,10 +107,20 @@ void GameManager::SpawnWave()
     // Scale difficulty with waves
     int lonersToSpawn = 2 + (currentWave / 2);
     int rushersToSpawn = 1 + (currentWave / 3);
-    int dronesToSpawn = (currentWave > 2) ? (currentWave / 2) : 0;
-	int bigAsteroidsToSpawn = (currentWave >= 5) ? 1 : 0;
-	int mediumAsteroidsToSpawn = (currentWave >= 3) ? 1 : 0;
-	int smallAsteroidsToSpawn = currentWave;
+    int dronesToSpawn = (currentWave >= 2) ? (currentWave / 3) : 0;
+
+	// Asteroids
+	int bigAsteroidsToSpawn = (currentWave >= 7) ? 2 : (currentWave >= 3) ? 1 : 0;
+
+    int mediumAsteroidsToSpawn = (currentWave >= 5) ? 2 : (currentWave >= 2) ? 1 : 0;
+    
+    int smallAsteroidsToSpawn = 0;
+    switch (currentWave) {
+    case 1: smallAsteroidsToSpawn = 3; break;
+    case 2: smallAsteroidsToSpawn = 4; break;
+    case 3: smallAsteroidsToSpawn = 3; break;
+    default: smallAsteroidsToSpawn = 2; break;
+    }
 
     SpawnLoners(lonersToSpawn);
     SpawnRushers(rushersToSpawn);
@@ -116,17 +138,23 @@ void GameManager::SpawnWave()
 
 void GameManager::SpawnLoners(int count)
 {
-    float screenWidth = world->GetWorldBounds().x;
+	float direction = 1.0f;
 
     for (int i = 0; i < count; i++)
     {
         Loner* loner = world->SpawnActor<Loner>();
         if (loner)
         {
-            float xPos = 100.0f + (i * (screenWidth - 200.0f) / count);
-            float yPos = 100.0f + (i % 2) * 50.0f;
-            loner->SetPosition(Vector2(xPos, yPos));
-            loner->SetDirection(1.0f);
+            std::random_device rd;                  // seed
+            std::mt19937 gen(rd());                 // Mersenne Twister engine
+            std::uniform_int_distribution<> dist(100, 800);
+
+            float yPos = 100.0f + (i % 4) * 75.0f;
+            loner->SetPosition(Vector2(dist(gen), yPos));
+            
+            loner->SetDirection(direction);
+			direction *= -1.0f; // Alternate direction for next loner
+
             loner->SetGameManager(this); // Set reference to game manager
         }
     }
@@ -134,19 +162,18 @@ void GameManager::SpawnLoners(int count)
 
 void GameManager::SpawnRushers(int count)
 {
-    float screenWidth = world->GetWorldBounds().x;
 
     for (int i = 0; i < count; i++)
     {
         Rusher* rusher = world->SpawnActor<Rusher>();
         if (rusher)
         {
-            std::random_device rd;                  // seed
-            std::mt19937 gen(rd());                 // Mersenne Twister engine
-            std::uniform_int_distribution<> dist(100, 700);
+            std::random_device rd;                  
+            std::mt19937 gen(rd());                 
+            std::uniform_int_distribution<> distX(100, 700);           
+            std::uniform_int_distribution<> distY(100, 500);
 
-            float yPos = 100.0f;
-            rusher->SetPosition(Vector2(dist(gen), yPos));
+            rusher->SetPosition(Vector2(distX(gen), -distY(gen)));
             rusher->SetGameManager(this); // Set reference to game manager
         }
     }
@@ -157,11 +184,13 @@ void GameManager::SpawnDrones(int count)
     
     for (int a = 0; a < count; a++)
     {
-        std::random_device rd;                  // seed
-        std::mt19937 gen(rd());                 // Mersenne Twister engine
-        std::uniform_int_distribution<> dist(200, 600);
+        std::random_device rd;                  
+        std::mt19937 gen(rd());                 
+        std::uniform_int_distribution<> distX(200, 600);
+        std::uniform_int_distribution<> distY(100, 500);
 
-        float randomX = dist(gen);
+		float randomY = distY(gen);
+        float randomX = distX(gen);
 
         for (int i = 0; i < 3; i++)
         {
@@ -170,7 +199,7 @@ void GameManager::SpawnDrones(int count)
             {
                 float yOffset = i * 50.0f;
                 drone->SetBaseX(randomX); // Center X for sine wave
-                drone->SetPosition(Vector2(0.0f, 100.0f + yOffset));
+                drone->SetPosition(Vector2(0.0f, -randomY + yOffset));
                 drone->SetTimeOffset(i * 0.1f);
                 drone->SetGameManager(this); // Set reference to game manager
             }
@@ -187,11 +216,12 @@ void GameManager::SpawnBigAsteroid(int count)
 
         if (bigAsteroid)
         {
-            std::random_device rd;                  // seed
-            std::mt19937 gen(rd());                 // Mersenne Twister engine
-            std::uniform_int_distribution<> dist(200, 600);
+            std::random_device rd;                  
+            std::mt19937 gen(rd());                 
+            std::uniform_int_distribution<> distX(200, 600);
+            std::uniform_int_distribution<> distY(100, 600);
 
-			bigAsteroid->SetPosition(Vector2(dist(gen), 100.0f));
+			bigAsteroid->SetPosition(Vector2(distX(gen), -distY(gen)));
 			bigAsteroid->SetGameManager(this); // Set reference to game manager
 
         }
@@ -207,11 +237,12 @@ void GameManager::SpawnMediumAsteroid(int count)
 
         if (mediumAsteroid)
         {
-            std::random_device rd;                  // seed
-            std::mt19937 gen(rd());                 // Mersenne Twister engine
-            std::uniform_int_distribution<> dist(150, 650);
+            std::random_device rd;                  
+            std::mt19937 gen(rd());                 
+            std::uniform_int_distribution<> distX(150, 650);
+            std::uniform_int_distribution<> distY(100, 600);
 
-            mediumAsteroid->SetPosition(Vector2(dist(gen), 100.0f));
+            mediumAsteroid->SetPosition(Vector2(distX(gen), -distY(gen)));
             mediumAsteroid->SetGameManager(this); // Set reference to game manager
 
         }
@@ -227,11 +258,12 @@ void GameManager::SpawnSmallAsteroid(int count)
 
         if (smallAsteroid)
         {
-            std::random_device rd;                  // seed
-            std::mt19937 gen(rd());                 // Mersenne Twister engine
-            std::uniform_int_distribution<> dist(100, 700);
-            
-            smallAsteroid->SetPosition(Vector2(dist(gen), 100.0f));
+            std::random_device rd;                  
+            std::mt19937 gen(rd());                
+            std::uniform_int_distribution<> distX(100, 700);
+            std::uniform_int_distribution<> distY(100, 600);
+
+            smallAsteroid->SetPosition(Vector2(distX(gen), -distY(gen)));
             smallAsteroid->SetGameManager(this); // Set reference to game manager
 
         }
@@ -246,10 +278,38 @@ void GameManager::AddScore(int points)
     ChimasLog::Info("Score: %d (+%d)", playerScore, points);
 }
 
+// Save high score
+void GameManager::SaveHighScore(int score)
+{
+    std::ofstream file("highscore.txt");
+    if (file.is_open())
+    {
+        file << score;
+        file.close();
+    }
+}
+
+// Load high score
+int GameManager::LoadHighScore()
+{
+    std::ifstream file("highscore.txt");
+    int score = 0;
+    if (file.is_open())
+    {
+        file >> score;
+        file.close();
+    }
+    else
+    {
+        // File doesn't exist yet, create it with default value
+        SaveHighScore(0);
+    }
+    return score;
+}
+
 void GameManager::OnEnemyKilled()
 {
     enemiesAlive--;
-    ChimasLog::Info("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEnemy killed! Remaining: %d", enemiesAlive);
 
     if (enemiesAlive <= 0)
     {
@@ -260,6 +320,12 @@ void GameManager::OnEnemyKilled()
 void GameManager::OnPlayerDeath()
 {
     isGameOver = true;
+	// Update High Score to new Score if better
+	if (playerScore > highScore)
+	{
+		highScore = playerScore;
+		SaveHighScore(highScore);
+	}
     ShowGameOverScreen();
     ChimasLog::Info("GAME OVER! Final Score: %d, Waves Completed: %d", playerScore, currentWave);
 }
@@ -268,7 +334,7 @@ void GameManager::UpdateScoreDisplay()
 {
     if (scoreText)
     {
-        scoreText->SetText("SCORE: " + std::to_string(playerScore));
+        scoreText->SetText("SCORE\n\n" + std::to_string(playerScore));
     }
 }
 
@@ -307,11 +373,21 @@ void GameManager::ShowGameOverScreen()
     gameOverText->SetHorizontalAlignment(CTextWidget::TextAlign::Center);
     gameOverText->SetZOrder(100); // Draw on top
 
+    // High score
+    CTextWidget* highScoreText = hud->CreateWidget<CTextWidget>();
+    highScoreText->LoadGridFont(fontPath, 16, 16, " !~#$%&'()*+,-./0123456789:;<=>?ÇABCDEFGHIJKLMNOPQRSTUVWXYZ[¨]^»`abcdefghijklmnopqrstuvwxyz{|}ªº");
+    highScoreText->SetText("HIGH SCORE: " + std::to_string(highScore));
+    highScoreText->SetPosition(Vector2(0.0f, 380.0f));
+    highScoreText->SetSize(Vector2(800.0f, 40.0f));
+    highScoreText->SetScale(1.5f);
+    highScoreText->SetHorizontalAlignment(CTextWidget::TextAlign::Center);
+    highScoreText->SetZOrder(100);
+
     // Final score
     CTextWidget* finalScoreText = hud->CreateWidget<CTextWidget>();
     finalScoreText->LoadGridFont(fontPath, 16, 16, " !~#$%&'()*+,-./0123456789:;<=>?ÇABCDEFGHIJKLMNOPQRSTUVWXYZ[¨]^»`abcdefghijklmnopqrstuvwxyz{|}ªº");
     finalScoreText->SetText("FINAL SCORE: " + std::to_string(playerScore));
-    finalScoreText->SetPosition(Vector2(0.0f, 380.0f));
+    finalScoreText->SetPosition(Vector2(0.0f, 430.0f));
     finalScoreText->SetSize(Vector2(800.0f, 40.0f));
     finalScoreText->SetScale(1.5f);
     finalScoreText->SetHorizontalAlignment(CTextWidget::TextAlign::Center);
@@ -320,8 +396,8 @@ void GameManager::ShowGameOverScreen()
     // Waves survived
     CTextWidget* wavesText = hud->CreateWidget<CTextWidget>();
     wavesText->LoadGridFont(fontPath, 16, 16, " !~#$%&'()*+,-./0123456789:;<=>?ÇABCDEFGHIJKLMNOPQRSTUVWXYZ[¨]^»`abcdefghijklmnopqrstuvwxyz{|}ªº");
-    wavesText->SetText("WAVES SURVIVED: " + std::to_string(currentWave));
-    wavesText->SetPosition(Vector2(0.0f, 430.0f));
+    wavesText->SetText("WAVES SURVIVED: " + std::to_string(--currentWave));
+    wavesText->SetPosition(Vector2(0.0f, 480.0f));
     wavesText->SetSize(Vector2(800.0f, 40.0f));
     wavesText->SetScale(1.5f);
     wavesText->SetHorizontalAlignment(CTextWidget::TextAlign::Center);

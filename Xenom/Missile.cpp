@@ -15,7 +15,7 @@
 
 Missile::Missile(CWorld* world)
     : CActor(world), sprite(nullptr), animation(nullptr),
-    physics(nullptr), speed(-400.0f), damage(25.f)
+    physics(nullptr), speed(-500.0f), damage(25.f)
 {
 }
 
