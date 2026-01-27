@@ -10,6 +10,10 @@
 #include "StoneAsteroidBig.h"
 #include "StoneAsteroidMedium.h"
 #include "StoneAsteroidSmall.h"
+#include "MetalAsteroidBig.h"
+#include "MetalAsteroidMedium.h"
+#include "MetalAsteroidSmall.h"
+#include "ShieldPowerUp.h"
 #include "ChimasLog.h"
 #include <string>
 #include <random>
@@ -109,18 +113,32 @@ void GameManager::SpawnWave()
     int rushersToSpawn = 1 + (currentWave / 3);
     int dronesToSpawn = (currentWave >= 2) ? (currentWave / 3) : 0;
 
-	// Asteroids
+	// Asteroids (Stone)
 	int bigAsteroidsToSpawn = (currentWave >= 7) ? 2 : (currentWave >= 3) ? 1 : 0;
 
     int mediumAsteroidsToSpawn = (currentWave >= 5) ? 2 : (currentWave >= 2) ? 1 : 0;
     
     int smallAsteroidsToSpawn = 0;
     switch (currentWave) {
-    case 1: smallAsteroidsToSpawn = 3; break;
-    case 2: smallAsteroidsToSpawn = 4; break;
-    case 3: smallAsteroidsToSpawn = 3; break;
+    case 1: smallAsteroidsToSpawn = 2; break;
+    case 2: smallAsteroidsToSpawn = 3; break;
     default: smallAsteroidsToSpawn = 2; break;
     }
+    // Asteroids (Metal)
+    int bigMetalAsteroidsToSpawn = (currentWave >= 7) ? 2 : (currentWave >= 3) ? 1 : 0;
+
+    int mediumMetalAsteroidsToSpawn = (currentWave >= 5) ? 2 : (currentWave >= 2) ? 1 : 0;
+
+    int smallMetalAsteroidsToSpawn = 0;
+    switch (currentWave) {
+    case 1: smallMetalAsteroidsToSpawn = 2; break;
+    case 2: smallMetalAsteroidsToSpawn = 3; break;
+    default: smallMetalAsteroidsToSpawn = 2; break;
+    }
+
+    //Power Up (Heal)
+    int shieldPowerUpsToSpawn = (currentWave % 2 == 0) ? 1 : 0; //spawn 1 on every even wave
+
 
     SpawnLoners(lonersToSpawn);
     SpawnRushers(rushersToSpawn);
@@ -128,6 +146,10 @@ void GameManager::SpawnWave()
 	SpawnBigAsteroid(bigAsteroidsToSpawn);
 	SpawnMediumAsteroid(mediumAsteroidsToSpawn);    
 	SpawnSmallAsteroid(smallAsteroidsToSpawn);
+    SpawnBigMetalAsteroid(bigMetalAsteroidsToSpawn);
+    SpawnMediumMetalAsteroid(mediumMetalAsteroidsToSpawn);
+    SpawnSmallMetalAsteroid(smallMetalAsteroidsToSpawn);
+    SpawnShieldPowerUp(shieldPowerUpsToSpawn);
 
     enemiesAlive = lonersToSpawn + rushersToSpawn + (dronesToSpawn*3);
 
@@ -218,8 +240,8 @@ void GameManager::SpawnBigAsteroid(int count)
         {
             std::random_device rd;                  
             std::mt19937 gen(rd());                 
-            std::uniform_int_distribution<> distX(200, 600);
-            std::uniform_int_distribution<> distY(100, 600);
+            std::uniform_int_distribution<> distX(100, 700);
+            std::uniform_int_distribution<> distY(100, 1000);
 
 			bigAsteroid->SetPosition(Vector2(distX(gen), -distY(gen)));
 			bigAsteroid->SetGameManager(this); // Set reference to game manager
@@ -239,8 +261,8 @@ void GameManager::SpawnMediumAsteroid(int count)
         {
             std::random_device rd;                  
             std::mt19937 gen(rd());                 
-            std::uniform_int_distribution<> distX(150, 650);
-            std::uniform_int_distribution<> distY(100, 600);
+            std::uniform_int_distribution<> distX(100, 700);
+            std::uniform_int_distribution<> distY(100, 1250);
 
             mediumAsteroid->SetPosition(Vector2(distX(gen), -distY(gen)));
             mediumAsteroid->SetGameManager(this); // Set reference to game manager
@@ -261,7 +283,7 @@ void GameManager::SpawnSmallAsteroid(int count)
             std::random_device rd;                  
             std::mt19937 gen(rd());                
             std::uniform_int_distribution<> distX(100, 700);
-            std::uniform_int_distribution<> distY(100, 600);
+            std::uniform_int_distribution<> distY(50, 1500);
 
             smallAsteroid->SetPosition(Vector2(distX(gen), -distY(gen)));
             smallAsteroid->SetGameManager(this); // Set reference to game manager
@@ -270,6 +292,87 @@ void GameManager::SpawnSmallAsteroid(int count)
 
     }
 }
+
+void GameManager::SpawnBigMetalAsteroid(int count)
+{
+    for (int i = 0; i < count; i++)
+    {
+        MetalAsteroidBig* bigMetalAsteroid = world->SpawnActor<MetalAsteroidBig>();
+
+        if (bigMetalAsteroid)
+        {
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_int_distribution<> distX(100, 700);
+            std::uniform_int_distribution<> distY(100, 1000);
+
+            bigMetalAsteroid->SetPosition(Vector2(distX(gen), -distY(gen)));
+
+        }
+
+    }
+}
+
+void GameManager::SpawnMediumMetalAsteroid(int count)
+{
+    for (int i = 0; i < count; i++)
+    {
+        MetalAsteroidMedium* mediumMetalAsteroid = world->SpawnActor<MetalAsteroidMedium>();
+
+        if (mediumMetalAsteroid)
+        {
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_int_distribution<> distX(100, 700);
+            std::uniform_int_distribution<> distY(100, 1250);
+
+            mediumMetalAsteroid->SetPosition(Vector2(distX(gen), -distY(gen)));
+
+        }
+
+    }
+}
+
+void GameManager::SpawnSmallMetalAsteroid(int count)
+{
+    for (int i = 0; i < count; i++)
+    {
+        MetalAsteroidSmall* smallMetalAsteroid = world->SpawnActor<MetalAsteroidSmall>();
+
+        if (smallMetalAsteroid)
+        {
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_int_distribution<> distX(100, 700);
+            std::uniform_int_distribution<> distY(50, 1500);
+
+            smallMetalAsteroid->SetPosition(Vector2(distX(gen), -distY(gen)));
+            
+        }
+
+    }
+}
+
+void GameManager::SpawnShieldPowerUp(int count)
+{
+    for (int i = 0; i < count; i++)
+    {
+        ShieldPowerUp* shieldPowerUp = world->SpawnActor<ShieldPowerUp>();
+
+        if (shieldPowerUp)
+        {
+            std::random_device rd;
+            std::mt19937 gen(rd());
+            std::uniform_int_distribution<> distX(100, 700);
+            std::uniform_int_distribution<> distY(200, 1000);
+
+            shieldPowerUp->SetPosition(Vector2(distX(gen), -distY(gen)));
+
+        }
+
+    }
+}
+
 
 void GameManager::AddScore(int points)
 {

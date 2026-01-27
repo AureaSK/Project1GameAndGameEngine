@@ -59,7 +59,7 @@ void Spaceship::BeginPlay()
     // FIXED: Set collision filter BEFORE creating shape
     physics->SetCollisionFilter(
         CollisionCategory::PLAYER,
-        CollisionCategory::ENEMY | CollisionCategory::ENEMY_PROJECTILE | CollisionCategory::WALL
+        CollisionCategory::ENEMY | CollisionCategory::ENEMY_PROJECTILE | CollisionCategory::WALL | CollisionCategory::POWERUP
     );
 
     

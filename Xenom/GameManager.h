@@ -28,6 +28,10 @@ private:
     void SpawnBigAsteroid(int count);
     void SpawnMediumAsteroid(int count);
     void SpawnSmallAsteroid(int count);
+    void SpawnBigMetalAsteroid(int count);
+    void SpawnMediumMetalAsteroid(int count);
+    void SpawnSmallMetalAsteroid(int count);
+    void SpawnShieldPowerUp(int count);
 
 public:
     GameManager(CWorld* world);

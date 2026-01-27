@@ -18,6 +18,7 @@ namespace CollisionCategory
     const uint32_t PLAYER_PROJECTILE = 0x0004;
     const uint32_t ENEMY_PROJECTILE = 0x0008;
     const uint32_t WALL = 0x0010;
+    const uint32_t POWERUP = 0x0012;
 }
 
 class CPhysicsComponent : public CComponent

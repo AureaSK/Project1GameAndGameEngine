@@ -86,6 +86,12 @@ void EnemyProjectile::OnCollision(CActor* other)
     }
     else
     {
+        Explosion* kabum = world->SpawnActor<Explosion>();
+        if (kabum)
+        {
+            kabum->SetPosition(transform.position);
+        }
+
         Destroy();
     }
 }
