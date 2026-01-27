@@ -234,8 +234,8 @@ void GameManager::SpawnBigAsteroid(int count)
         {
             std::random_device rd;                  
             std::mt19937 gen(rd());                 
-            std::uniform_int_distribution<> distX(200, 600);
-            std::uniform_int_distribution<> distY(100, 600);
+            std::uniform_int_distribution<> distX(100, 700);
+            std::uniform_int_distribution<> distY(100, 1000);
 
 			bigAsteroid->SetPosition(Vector2(distX(gen), -distY(gen)));
 			bigAsteroid->SetGameManager(this); // Set reference to game manager
@@ -255,8 +255,8 @@ void GameManager::SpawnMediumAsteroid(int count)
         {
             std::random_device rd;                  
             std::mt19937 gen(rd());                 
-            std::uniform_int_distribution<> distX(150, 650);
-            std::uniform_int_distribution<> distY(100, 600);
+            std::uniform_int_distribution<> distX(100, 700);
+            std::uniform_int_distribution<> distY(100, 1250);
 
             mediumAsteroid->SetPosition(Vector2(distX(gen), -distY(gen)));
             mediumAsteroid->SetGameManager(this); // Set reference to game manager
@@ -277,7 +277,7 @@ void GameManager::SpawnSmallAsteroid(int count)
             std::random_device rd;                  
             std::mt19937 gen(rd());                
             std::uniform_int_distribution<> distX(100, 700);
-            std::uniform_int_distribution<> distY(100, 600);
+            std::uniform_int_distribution<> distY(50, 1500);
 
             smallAsteroid->SetPosition(Vector2(distX(gen), -distY(gen)));
             smallAsteroid->SetGameManager(this); // Set reference to game manager
@@ -297,8 +297,8 @@ void GameManager::SpawnBigMetalAsteroid(int count)
         {
             std::random_device rd;
             std::mt19937 gen(rd());
-            std::uniform_int_distribution<> distX(200, 600);
-            std::uniform_int_distribution<> distY(100, 600);
+            std::uniform_int_distribution<> distX(100, 700);
+            std::uniform_int_distribution<> distY(100, 1000);
 
             bigMetalAsteroid->SetPosition(Vector2(distX(gen), -distY(gen)));
 
@@ -317,8 +317,8 @@ void GameManager::SpawnMediumMetalAsteroid(int count)
         {
             std::random_device rd;
             std::mt19937 gen(rd());
-            std::uniform_int_distribution<> distX(150, 650);
-            std::uniform_int_distribution<> distY(100, 600);
+            std::uniform_int_distribution<> distX(100, 700);
+            std::uniform_int_distribution<> distY(100, 1250);
 
             mediumMetalAsteroid->SetPosition(Vector2(distX(gen), -distY(gen)));
 
@@ -338,7 +338,7 @@ void GameManager::SpawnSmallMetalAsteroid(int count)
             std::random_device rd;
             std::mt19937 gen(rd());
             std::uniform_int_distribution<> distX(100, 700);
-            std::uniform_int_distribution<> distY(100, 600);
+            std::uniform_int_distribution<> distY(50, 1500);
 
             smallMetalAsteroid->SetPosition(Vector2(distX(gen), -distY(gen)));
             
